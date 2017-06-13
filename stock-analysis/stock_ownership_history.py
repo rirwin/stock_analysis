@@ -11,6 +11,8 @@ URL_TEMPLATE = 'http://www.google.com/finance/historical?q={exchange}:{symbol}&s
 WEB_CACHE = 'web_cache.pickle'
 
 Order = namedtuple('Order', ['symbol', 'date', 'num_shares', 'price'])
+
+# TODO get rid of exchange.  Only needed at API
 Symbol = namedtuple('Symbol', ['exchange', 'name'])
 SymbolDate = namedtuple('SymbolDate', ['symbol', 'date'])
 StockPriceDate = namedtuple('StockPriceDate', ['price', 'date'])
