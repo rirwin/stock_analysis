@@ -21,4 +21,5 @@ class OrderHistory(Base):
 
 # create table with
 # from database import db
-# Base.metadata.create_all(db.engine)
+# from database import order_history
+# order_history.Base.metadata.create_all(db.engine)
