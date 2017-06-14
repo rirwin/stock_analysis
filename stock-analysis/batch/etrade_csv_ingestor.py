@@ -2,6 +2,10 @@ import argparse
 from collections import namedtuple
 import csv
 import datetime
+from sqlalchemy.orm import sessionmaker
+
+from database.order_history import OrderHistory
+from database import db
 
 
 # TODO handle symbols that are sold
@@ -17,6 +21,12 @@ class RowParserException(Exception):
     pass
 
 
+USER_ID=1
+
+
+Session = sessionmaker(bind=db.engine)
+
+
 class EtradeIngestor(object):
 
 
@@ -27,7 +37,21 @@ class EtradeIngestor(object):
     def run(self):
         self.args = self.arg_parser.parse_args()
         orders = self.parse_orders_from_csv(self.args.csv_path)
-        print(orders)
+        self.add_orders_to_db(orders)
+
+    def add_orders_to_db(self, orders):
+        session = Session()
+        for order in orders:
+            session.add(
+                OrderHistory(
+                    user_id=USER_ID,
+                    date=order.date,
+                    ticker=order.ticker,
+                    num_shares=order.num_shares,
+                    price=order.price,
+                )
+            )
+        session.commit()
 
     def parse_orders_from_csv(self, csv_path):
         with open(csv_path) as csv_file:
