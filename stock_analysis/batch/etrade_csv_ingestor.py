@@ -2,10 +2,8 @@ import argparse
 from collections import namedtuple
 import csv
 import datetime
-from sqlalchemy.orm import sessionmaker
 
-from database.order_history import OrderHistory
-from database import db
+from stock_analysis.logic.order import OrderHistoryLogic
 
 
 # TODO handle symbols that are sold
@@ -24,34 +22,18 @@ class RowParserException(Exception):
 USER_ID=1
 
 
-Session = sessionmaker(bind=db.engine)
-
-
 class EtradeIngestor(object):
 
 
     def __init__(self):
         self.arg_parser = argparse.ArgumentParser(description='Process an etrade csv file')
         self.arg_parser.add_argument('--csv-path', help='path to csv file')
+        self.order_logic = OrderHistoryLogic()
 
     def run(self):
         self.args = self.arg_parser.parse_args()
         orders = self.parse_orders_from_csv(self.args.csv_path)
-        self.add_orders_to_db(orders)
-
-    def add_orders_to_db(self, orders):
-        session = Session()
-        for order in orders:
-            session.add(
-                OrderHistory(
-                    user_id=USER_ID,
-                    date=order.date,
-                    ticker=order.ticker,
-                    num_shares=order.num_shares,
-                    price=order.price,
-                )
-            )
-        session.commit()
+        self.order_logic.add_orders(USER_ID, orders)
 
     def parse_orders_from_csv(self, csv_path):
         with open(csv_path) as csv_file:
