@@ -19,7 +19,6 @@ class OrderHistory(Base):
     price = Column(Float, primary_key=True)
 
 
-# create table with
-# from database import db
-# from database import order_history
-# order_history.Base.metadata.create_all(db.engine)
+if __name__ == "__main__":
+    from database import db
+    Base.metadata.create_all(db.engine)
