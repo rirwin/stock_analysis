@@ -5,3 +5,4 @@ virtualenv_run:
 
 create_tables: virtualenv_run
 	virtualenv_run/bin/python -m database.order_history
+	virtualenv_run/bin/python -m database.price_history
