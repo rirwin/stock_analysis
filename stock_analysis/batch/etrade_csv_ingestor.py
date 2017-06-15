@@ -3,6 +3,7 @@ from collections import namedtuple
 import csv
 import datetime
 
+from stock_analysis.logic.order import Order
 from stock_analysis.logic.order import OrderHistoryLogic
 
 
@@ -13,8 +14,6 @@ blacklisted_tickers = ['UAA', 'UA', 'CASY']
 blacklisted_tickers.append('AMT')
 
 
-Order = namedtuple('Order', ['ticker', 'date', 'num_shares', 'price'])
-
 class RowParserException(Exception):
     pass
 
@@ -23,7 +22,6 @@ USER_ID=1
 
 
 class EtradeIngestor(object):
-
 
     def __init__(self):
         self.arg_parser = argparse.ArgumentParser(description='Process an etrade csv file')
