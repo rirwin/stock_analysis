@@ -1,4 +1,5 @@
 from collections import namedtuple
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
 from database.order_history import OrderHistory
@@ -26,20 +27,12 @@ class OrderHistoryLogic(object):
             )
         session.commit()
 
-    #def get_tickers_and_min_dates_for_user(self, user_id):
-    #    session = Session()
-    #    query = '''
-    #    SELECT
-    #            min(date) AS date,
-    #            ticker
-    #    FROM
-    #            order_history
-    #    WHERE
-    #            user_id = {user_id}
-    #    GROUP
-    #    BY
-    #            ticker
-    #    '''.format(user_id=user_id)
-    #    results = session.fetch_many(query)
-    #    session.close()
-    #    return results
+    def get_tickers_and_min_dates_for_user(self, user_id):
+        session = Session()
+        resp = session.query(OrderHistory.ticker, func.min(OrderHistory.date))\
+            .filter_by(user_id=user_id)\
+            .group_by(OrderHistory.ticker)\
+            .all()
+        ticker_dates = [TickerDate(*x) for x in resp]
+        session.close()
+        return ticker_dates
