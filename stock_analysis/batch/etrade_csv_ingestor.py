@@ -1,5 +1,4 @@
 import argparse
-from collections import namedtuple
 import csv
 import datetime
 
@@ -18,7 +17,7 @@ class RowParserException(Exception):
     pass
 
 
-USER_ID=1
+USER_ID = 1
 
 
 class EtradeIngestor(object):

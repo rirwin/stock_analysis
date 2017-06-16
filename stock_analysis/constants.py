@@ -1,6 +1,6 @@
 symbol_name_to_exchange = {}
 nasdaq_symbols = [
-    'AAPL', 'ADBE', 'ALGN', 'AMZN', 'ATVI', 'BIDU','BLUE', 'BOFI',
+    'AAPL', 'ADBE', 'ALGN', 'AMZN', 'ATVI', 'BIDU', 'BLUE', 'BOFI',
     'CELG', 'CGNX', 'COST', 'FB', 'FEYE', 'GOOG', 'HAIN',
     'HAS', 'ILMN', 'ISRG', 'JBLU', 'MAR', 'MASI', 'MELI',
     'MIDD', 'MOMO', 'NFLX', 'NVDA', 'OLED', 'PYPL', 'SBUX',

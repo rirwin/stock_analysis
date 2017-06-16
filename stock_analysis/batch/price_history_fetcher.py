@@ -1,5 +1,3 @@
-import argparse
-from collections import namedtuple
 import csv
 import datetime
 import pytz
@@ -15,7 +13,8 @@ class RowParserException(Exception):
 
 USER_ID = 1
 
-URL_TEMPLATE = 'http://www.google.com/finance/historical?q={exchange}:{ticker}&startdate={month}+{day}%2C+{year}&output=csv'
+URL_TEMPLATE = 'http://www.google.com/finance/historical?' + \
+'q={exchange}:{ticker}&startdate={month}+{day}%2C+{year}&output=csv'
 
 
 class PriceHistoryFetcher(object):
@@ -32,7 +31,8 @@ class PriceHistoryFetcher(object):
                 begin_date = ticker_date.date
             data = self.fetch_ticker(ticker_date.ticker, begin_date)
 
-    def fetch_ticker(self,
+    def fetch_ticker(self):
+        pass
 
     def get_end_date(self):
         """Only get completed days data (after 4pm ET)
