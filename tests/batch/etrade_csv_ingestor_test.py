@@ -22,13 +22,13 @@ class TestEtradeCsvIngestor(object):
         mock_args.csv_path = csv_path
         mock_parsed_orders = mock.Mock()
         with \
-            mock.patch.object(
-                batch.arg_parser, 'parse_args', return_value=mock_args
-            ) as patch_parse_args, \
-            mock.patch.object(
-                batch, 'parse_orders_from_csv', return_value=mock_parsed_orders
-            ) as patch_parse_orders, \
-            mock.patch.object(batch.order_logic, 'add_orders') as patch_add_orders:
+                mock.patch.object(
+                    batch.arg_parser, 'parse_args', return_value=mock_args
+                ) as patch_parse_args, \
+                mock.patch.object(
+                    batch, 'parse_orders_from_csv', return_value=mock_parsed_orders
+                ) as patch_parse_orders, \
+                mock.patch.object(batch.order_logic, 'add_orders') as patch_add_orders:
 
             batch.run()
             assert patch_parse_args.called
