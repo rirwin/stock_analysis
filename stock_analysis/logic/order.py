@@ -35,7 +35,8 @@ class OrderHistoryLogic(object):
             .group_by(OrderHistory.ticker)\
             .all()
         ticker_dates = [
-            TickerDate(x[0], datetime.datetime.strptime(x[1], '%Y-%m-%d')) for x in resp
+            TickerDate(x[0], datetime.datetime.strptime(x[1], '%Y-%m-%d').date())
+            for x in resp
         ]
         session.close()
         return ticker_dates
