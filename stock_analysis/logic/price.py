@@ -17,7 +17,7 @@ class PriceHistoryLogic(object):
         session = Session()
         for ticker_date_price in ticker_date_prices:
             session.add(
-                DatePrice(
+                PriceHistory(
                     date=ticker_date_price.date.isoformat(),
                     ticker=ticker_date_price.ticker,
                     price=ticker_date_price.price,

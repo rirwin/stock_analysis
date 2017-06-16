@@ -1,10 +1,8 @@
-import csv
 import datetime
 import pytz
 
 from stock_analysis.logic.order import OrderHistoryLogic
 from stock_analysis.logic.price import PriceHistoryLogic
-from stock_analysis.logic.price import TickerDatePrice
 
 
 class RowParserException(Exception):
@@ -14,7 +12,7 @@ class RowParserException(Exception):
 USER_ID = 1
 
 URL_TEMPLATE = 'http://www.google.com/finance/historical?' + \
-'q={exchange}:{ticker}&startdate={month}+{day}%2C+{year}&output=csv'
+    'q={exchange}:{ticker}&startdate={month}+{day}%2C+{year}&output=csv'
 
 
 class PriceHistoryFetcher(object):
@@ -30,6 +28,7 @@ class PriceHistoryFetcher(object):
             if not begin_date:
                 begin_date = ticker_date.date
             data = self.fetch_ticker(ticker_date.ticker, begin_date)
+        return data
 
     def fetch_ticker(self):
         pass
