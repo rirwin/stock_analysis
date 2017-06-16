@@ -30,6 +30,6 @@ class PriceHistoryLogic(object):
         date_str = session.query(func.max(PriceHistory.date))\
             .filter_by(ticker=ticker)\
             .first()
-        date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+        date = datetime.datetime.strptime(date_str[0], '%Y-%m-%d').date()
         session.close()
         return date
