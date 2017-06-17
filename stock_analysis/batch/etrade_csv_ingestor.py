@@ -35,15 +35,15 @@ class EtradeIngestor(object):
     def parse_orders_from_csv(self, csv_path):
         with open(csv_path) as csv_file:
             reader = csv.reader(csv_file)
-            orders = self._parse_orders_from_csv_reader(reader)
+            orders = self.parse_orders_from_csv_reader(reader)
             return orders
 
-    def _parse_orders_from_csv_reader(self, reader):
+    def parse_orders_from_csv_reader(self, reader):
         orders = []
         for row in reader:
             try:
                 # Ingore lines that don't parse
-                order = self._extract_order_from_row(row)
+                order = self.extract_order_from_row(row)
             except RowParserException:
                 continue
 
@@ -52,7 +52,7 @@ class EtradeIngestor(object):
 
         return orders
 
-    def _extract_order_from_row(self, row):
+    def extract_order_from_row(self, row):
         try:
             date = datetime.datetime.strptime(row[0], "%m/%d/%y").date()
             txn_type = row[1]
