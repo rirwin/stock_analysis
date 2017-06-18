@@ -4,10 +4,10 @@ from collections import namedtuple
 import requests
 import pytz
 
-from stock_analysis.logic.order import OrderHistoryLogic
-from stock_analysis.logic.order import TickerDate
-from stock_analysis.logic.price import PriceHistoryLogic
-from stock_analysis.logic.price import TickerDatePrice
+from stock_analysis.logic.order_history import OrderHistoryLogic
+from stock_analysis.logic.order_history import TickerDate
+from stock_analysis.logic.price_history import PriceHistoryLogic
+from stock_analysis.logic.price_history import TickerDatePrice
 from stock_analysis import constants
 
 
