@@ -3,9 +3,9 @@ from sqlalchemy.orm import sessionmaker
 
 from database import db
 from database.order_history import OrderHistory
-from stock_analysis.logic.order import Order
-from stock_analysis.logic.order import OrderHistoryLogic
-from stock_analysis.logic.order import TickerDate
+from stock_analysis.logic.order_history import Order
+from stock_analysis.logic.order_history import OrderHistoryLogic
+from stock_analysis.logic.order_history import TickerDate
 
 
 Session = sessionmaker(bind=db.engine)
@@ -58,4 +58,27 @@ class TestOrderHistoryLogic(object):
 
         ticker_dates = logic.get_tickers_and_min_dates_for_user(user_id)
 
+        assert ticker_dates == [TickerDate(order1.ticker, order1.date)]
+
+    @db.in_sandbox
+    def test_get_all_order_tickers_min_date(self):
+        logic = OrderHistoryLogic()
+        user_id_1 = 1
+        user_id_2 = 2
+        order1 = Order(
+            date=datetime.date(2015, 8, 9),
+            ticker='AAPL',
+            num_shares=20,
+            price=150.001,
+        )
+        order2 = Order(
+            date=datetime.date(2017, 1, 1),
+            ticker='AAPL',
+            num_shares=20,
+            price=152.333,
+        )
+        logic.add_orders(user_id_1, [order1])
+        logic.add_orders(user_id_2, [order2])
+
+        ticker_dates = logic.get_all_order_tickers_min_date()
         assert ticker_dates == [TickerDate(order1.ticker, order1.date)]
