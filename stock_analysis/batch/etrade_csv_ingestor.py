@@ -2,8 +2,8 @@ import argparse
 import csv
 import datetime
 
-from stock_analysis.logic.order import Order
-from stock_analysis.logic.order import OrderHistoryLogic
+from stock_analysis.logic.order_history import Order
+from stock_analysis.logic.order_history import OrderHistoryLogic
 
 
 # TODO handle symbols that are sold
