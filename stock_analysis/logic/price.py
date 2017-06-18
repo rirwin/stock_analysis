@@ -33,3 +33,12 @@ class PriceHistoryLogic(object):
         date = datetime.datetime.strptime(date_str[0], '%Y-%m-%d').date()
         session.close()
         return date
+
+    def does_ticker_date_history_exists(self, ticker_date):
+        session = Session()
+        exists = session.query(PriceHistory.ticker)\
+            .filter_by(ticker=ticker_date.ticker)\
+            .filter_by(date=ticker_date.date)\
+            .first()
+        session.close()
+        return bool(exists)

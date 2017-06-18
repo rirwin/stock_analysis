@@ -40,3 +40,15 @@ class OrderHistoryLogic(object):
         ]
         session.close()
         return ticker_dates
+
+    def get_all_order_tickers_min_date(self):
+        session = Session()
+        resp = session.query(OrderHistory.ticker, func.min(OrderHistory.date))\
+            .group_by(OrderHistory.ticker)\
+            .all()
+        ticker_dates = [
+            TickerDate(x[0], datetime.datetime.strptime(x[1], '%Y-%m-%d').date())
+            for x in resp
+        ]
+        session.close()
+        return ticker_dates
