@@ -14,6 +14,7 @@ Session = sessionmaker(bind=db.engine)
 
 class OrderHistoryLogic(object):
 
+    # TODO add user_id to Order, consistency
     def add_orders(self, user_id, orders):
         session = Session()
         for order in orders:
