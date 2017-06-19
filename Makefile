@@ -13,6 +13,9 @@ dev_venv:
 test:
 	tox
 
+test_debug:
+	USE_TEST_DB=1 virtualenv_run/bin/python -m pytest -s tests/
+
 virtualenv_run:
 	virtualenv -p python3.5 virtualenv_run/
 	virtualenv_run/bin/pip install -r requirements.txt
