@@ -3,8 +3,8 @@ import datetime
 import mock
 import pytest
 
-from stock_analysis.batch.etrade_csv_ingestor import EtradeIngestor
-from stock_analysis.batch.etrade_csv_ingestor import RowParserException
+from batch.etrade_csv_ingestor import EtradeIngestor
+from batch.etrade_csv_ingestor import RowParserException
 from stock_analysis.logic import order_history
 from stock_analysis import constants
 
