@@ -1,14 +1,19 @@
-import datetime
-import time
 from collections import namedtuple
-import requests
+import datetime
+import logging
 import pytz
+import requests
+import time
 
 from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.order_history import TickerDate
 from stock_analysis.logic.price_history import PriceHistoryLogic
 from stock_analysis.logic.price_history import TickerDatePrice
 from stock_analysis import constants
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 DatePrice = namedtuple('DatePrice', ['date', 'price'])
@@ -27,21 +32,36 @@ class GooglePriceHistoryFetcher(object):
     def __init__(self):
         self.order_logic = OrderHistoryLogic()
         self.price_logic = PriceHistoryLogic()
+        self.log = logger
 
     def run(self):
         ticker_min_order_dates = self.order_logic.get_all_order_tickers_min_date()
         for ticker_date in ticker_min_order_dates:
-            fetch_date = self.get_fetch_date(ticker_date)
-            if self.should_fetch_new_data(fetch_date):
-                history = self.fetch_ticker_history(TickerDate(ticker_date.ticker, fetch_date))
-                self.price_logic.add_prices(history)
+            self.process_ticker_order_date(ticker_date)
+
+    def process_ticker_order_date(self, ticker_date):
+        self.log.info("Processing ticker %s" % ticker_date.ticker)
+        fetch_date = self.get_fetch_date(ticker_date)
+        if self.should_fetch_data_for_date(fetch_date):
+            self.log.info(
+                "Fetch history for ticker %s to %s" %
+                (ticker_date.ticker, fetch_date.isoformat())
+            )
+            history = self.fetch_ticker_history(TickerDate(ticker_date.ticker, fetch_date))
+            self.price_logic.add_prices(history)
 
     def get_fetch_date(self, ticker_min_order_date):
+        """gets a date that could be fetched,
+        either the min order date or max history date + 1
+        """
         if self.price_logic.does_ticker_date_history_exists(ticker_min_order_date):
-            return self.price_logic.get_max_date_history_for_ticker(ticker_min_order_date.ticker)
+            return self.price_logic.get_max_date_history_for_ticker(
+                ticker_min_order_date.ticker
+            ) + datetime.timedelta(days=1)
         return ticker_min_order_date.date
 
     def fetch_ticker_history(self, ticker_date):
+        self.log.info("...Fetching data from % to now..." % ticker_date.date.isoformat())
         url = self._form_url(ticker_date)
         # TODO check throttle
         time.sleep(1)  # Sleep to throttle hitting api
@@ -50,9 +70,9 @@ class GooglePriceHistoryFetcher(object):
         data = self._parse_historical(content)
         return [TickerDatePrice(ticker_date.ticker, x.date, x.price) for x in data]
 
-    def should_fetch_new_data(self, fetch_date):
+    def should_fetch_data_for_date(self, fetch_date):
         """See if there is possibly new data to fetch.
-        fetch_date is the max_history date or order date if no history exists.
+        fetch_date is the max_history date + 1 or order date if no history exists.
         Cases not to fetch:
         (1) fetch_date is today.
         (2) fetch_date is yesterday (not Friday) and it's after today's close.
@@ -70,10 +90,11 @@ class GooglePriceHistoryFetcher(object):
             if (day_diff == 1 and now_is_after_close) or day_diff >= 2:
                 return True
 
-        if fetch_weekday == 5:  # Friday
+        if fetch_weekday >= 4:  # Friday
             if (day_diff == 3 and now_is_after_close) or day_diff >= 4:
                 return True
 
+        self.log.info("...Skipping fetch, no new data...")
         return False
 
     def _form_url(self, ticker_date):
@@ -94,27 +115,17 @@ class GooglePriceHistoryFetcher(object):
         return sorted(rows, key=lambda x: x.date)
 
     def _parse_line(self, line):
-        '''Parse line in format 2-Jun-17,153.58,155.45,152.89,155.45,27770715
+        """Parse line in format 2-Jun-17,153.58,155.45,152.89,155.45,27770715
         The second to last field is the closing price.
-        '''
+        """
         fields = line.split(',')
         date = self._parse_date(fields[0])
         close = float(fields[-2])
         return DatePrice(date, close)
 
     def _parse_date(self, date_str):
-        '''Parse date in format 26-May-17'''
+        """Parse date in format 26-May-17"""
         return datetime.datetime.strptime(date_str, "%d-%b-%y").date()
-
-    # def get_end_date(self):
-    #    """Only get completed days data (after 4pm ET)
-    #    Ignore weekends and holidays - the api won't return data
-    #    Determine if this is actually needed
-    #    """
-    #    now_dt = datetime.datetime.now(pytz.timezone('US/Eastern'))
-    #    if now_dt.hour >= 16:
-    #        return now_dt.date()
-    #    return (now_dt - datetime.timedelta(1)).date()
 
 
 if __name__ == "__main__":
