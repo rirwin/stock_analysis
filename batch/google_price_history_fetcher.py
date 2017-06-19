@@ -13,7 +13,8 @@ from stock_analysis import constants
 
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+module_name = __file__.split('/')[-1].split('.')[0]
+logger = logging.getLogger(module_name)
 
 
 DatePrice = namedtuple('DatePrice', ['date', 'price'])
