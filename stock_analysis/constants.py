@@ -7,7 +7,7 @@ nasdaq_tickers = [
     'HAS', 'ILMN', 'ISRG', 'JBLU', 'MAR', 'MASI', 'MELI',
     'MIDD', 'MOMO', 'NFLX', 'NVDA', 'OLED', 'PYPL', 'SBUX',
     'SPLK', 'SSNC', 'SWKS', 'TSLA', 'TTD', 'UBNT', 'ULTA',
-    'Z',
+    'YELP', 'Z',
 ]
 nyse_tickers = [
     'AMT',
