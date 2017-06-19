@@ -62,7 +62,7 @@ class GooglePriceHistoryFetcher(object):
         return ticker_min_order_date.date
 
     def fetch_ticker_history(self, ticker_date):
-        self.log.info("...Fetching data from % to now..." % ticker_date.date.isoformat())
+        self.log.info("...Fetching data from %s to now..." % ticker_date.date.isoformat())
         url = self._form_url(ticker_date)
         # TODO check throttle
         time.sleep(1)  # Sleep to throttle hitting api
