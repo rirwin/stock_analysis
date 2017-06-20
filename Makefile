@@ -14,7 +14,7 @@ test:
 	tox
 
 test_debug:
-	USE_TEST_DB=1 virtualenv_run/bin/python -m pytest -s tests/
+	USE_TEST_DB=1 virtualenv_run/bin/python -m pytest -s tests/ -v
 
 virtualenv_run:
 	virtualenv -p python3.5 virtualenv_run/
