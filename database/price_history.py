@@ -14,7 +14,7 @@ class PriceHistory(Base):
 
     date = Column(Integer, primary_key=True)
     ticker = Column(String, primary_key=True)
-    price = Column(Float, primary_key=True)
+    price = Column(Float, primary_key=True)  # TODO could remove primary key for protection
 
 
 if __name__ == "__main__":
