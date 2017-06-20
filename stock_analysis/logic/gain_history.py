@@ -13,17 +13,18 @@ class GainHistoryLogic(object):
 
     def get_percent_gain(self, user_id, ticker):
         session = Session()
-        result = session.query(OrderHistory.price)\
+        result = session.query(OrderHistory.price, OrderHistory.num_shares)\
             .filter_by(ticker=ticker)\
             .filter_by(user_id=user_id)\
-            .first()  # TODO change this for multiple order gains
-        order_price = result[0]
+            .all()
+        initial_value = sum(x.price * x.num_shares for x in result)
+        num_shares = sum(x.num_shares for x in result)
 
         max_date = price_logic.get_max_date_history_for_ticker(ticker)
         result = session.query(PriceHistory.price)\
             .filter_by(ticker=ticker)\
             .filter_by(date=max_date.isoformat())\
             .first()
-        current_price = result[0]
-
-        return 100 * (current_price - order_price) / order_price
+        final_price = result[0]
+        final_value = final_price * num_shares
+        return 100 * (final_value - initial_value) / initial_value
