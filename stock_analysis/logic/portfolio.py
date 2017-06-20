@@ -9,7 +9,7 @@ Session = sessionmaker(bind=db.engine)
 price_logic = PriceHistoryLogic()
 
 
-class GainHistoryLogic(object):
+class PortfolioLogic(object):
 
     def get_percent_gain(self, user_id, ticker):
         session = Session()
@@ -35,7 +35,6 @@ class GainHistoryLogic(object):
             .filter_by(ticker=ticker)\
             .filter_by(user_id=user_id)\
             .all()
-        initial_value = sum(x.price * x.num_shares for x in result)
         num_shares = sum(x.num_shares for x in result)
 
         max_date = price_logic.get_max_date_history_for_ticker(ticker)

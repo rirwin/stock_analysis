@@ -2,7 +2,7 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 
 from database import db
-from stock_analysis.logic.gain_history import GainHistoryLogic
+from stock_analysis.logic.portfolio import PortfolioLogic
 from stock_analysis.logic.order_history import Order
 from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.price_history import PriceHistoryLogic
@@ -12,10 +12,10 @@ from stock_analysis.logic.price_history import TickerDatePrice
 Session = sessionmaker(bind=db.engine)
 
 
-class TestGainHistoryLogic(object):
+class TestPortfolioLogic(object):
 
     user_id = 1
-    gain_logic = GainHistoryLogic()
+    portfolio_logic = PortfolioLogic()
     order_logic = OrderHistoryLogic()
     price_logic = PriceHistoryLogic()
 
@@ -39,7 +39,7 @@ class TestGainHistoryLogic(object):
         self.order_logic.add_orders(self.user_id, [order])
         self.price_logic.add_prices(prices)
 
-        assert self.gain_logic.get_percent_gain(self.user_id, order.ticker) == \
+        assert self.portfolio_logic.get_percent_gain(self.user_id, order.ticker) == \
             100 * (prices[-1].price - order.price) / order.price
 
     @db.in_sandbox
@@ -76,7 +76,7 @@ class TestGainHistoryLogic(object):
 
         initial_value = order1.price * order1.num_shares + order2.price * order2.num_shares
         final_value = (order1.num_shares + order2.num_shares) * prices[-1].price
-        assert self.gain_logic.get_percent_gain(self.user_id, order1.ticker) == \
+        assert self.portfolio_logic.get_percent_gain(self.user_id, order1.ticker) == \
             100 * (final_value - initial_value) / initial_value
 
     @db.in_sandbox
@@ -112,4 +112,4 @@ class TestGainHistoryLogic(object):
         self.price_logic.add_prices(prices)
 
         final_value = (order1.num_shares + order2.num_shares) * prices[-1].price
-        assert self.gain_logic.get_stock_value(self.user_id, order1.ticker) == final_value
+        assert self.portfolio_logic.get_stock_value(self.user_id, order1.ticker) == final_value
