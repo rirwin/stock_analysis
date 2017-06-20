@@ -87,12 +87,12 @@ class GooglePriceHistoryFetcher(object):
         if now_dt.hour >= 16:
             now_is_after_close = True
 
-        if fetch_weekday < 4:  # Mon-Thurs
-            if (day_diff == 1 and now_is_after_close) or day_diff >= 2:
+        if fetch_weekday <= 4:  # Mon-Friday
+            if (day_diff == 0 and now_is_after_close) or day_diff >= 1:
                 return True
 
-        if fetch_weekday >= 4:  # Friday
-            if (day_diff == 3 and now_is_after_close) or day_diff >= 4:
+        if fetch_weekday > 4:  # Saturday (data for week exists)
+            if (day_diff == 2 and now_is_after_close) or day_diff >= 3:
                 return True
 
         self.log.info("...Skipping fetch, no new data...")

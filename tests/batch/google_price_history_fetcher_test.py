@@ -21,11 +21,18 @@ class TestGooglePriceHistoryFetcher(object):
 
     @pytest.mark.parametrize(
         'fetch_date,now,should_fetch', [
-            (datetime.date(2017, 6, 16), datetime.datetime(2017, 6, 18), False),
-            (datetime.date(2017, 6, 16), datetime.datetime(2017, 6, 19, 15, tzinfo=pytz.timezone('US/Eastern')), False),
-            (datetime.date(2017, 6, 16), datetime.datetime(2017, 6, 19, 17, tzinfo=pytz.timezone('US/Eastern')), True),
-            (datetime.date(2017, 6, 12), datetime.datetime(2017, 6, 13, 15, tzinfo=pytz.timezone('US/Eastern')), False),
-            (datetime.date(2017, 6, 12), datetime.datetime(2017, 6, 13, 17, tzinfo=pytz.timezone('US/Eastern')), True),
+            # Have data for Thursday but not Friday and it's Sunday
+            (datetime.date(2017, 6, 16), datetime.datetime(2017, 6, 18), True),
+            # Have data for Friday and it's Sunday
+            (datetime.date(2017, 6, 17), datetime.datetime(2017, 6, 18), False),
+            # Have data for Friday and it's Monday before close
+            (datetime.date(2017, 6, 17), datetime.datetime(2017, 6, 19, 15, tzinfo=pytz.timezone('US/Eastern')), False),
+            # Have data for Friday and it's Monday after close
+            (datetime.date(2017, 6, 17), datetime.datetime(2017, 6, 19, 17, tzinfo=pytz.timezone('US/Eastern')), True),
+            # Have data for day before and it's before close
+            (datetime.date(2017, 6, 13), datetime.datetime(2017, 6, 13, 15, tzinfo=pytz.timezone('US/Eastern')), False),
+            # Have data for day before and it's after close
+            (datetime.date(2017, 6, 13), datetime.datetime(2017, 6, 13, 17, tzinfo=pytz.timezone('US/Eastern')), True),
 
         ]
     )
