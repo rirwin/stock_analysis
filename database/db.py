@@ -26,6 +26,10 @@ def drop_all_tables():
 def in_sandbox(func):
     def new_func(*args, **kwargs):
         create_all_tables()
-        func(*args, **kwargs)
-        drop_all_tables()
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            raise e
+        finally:
+            drop_all_tables()
     return new_func
