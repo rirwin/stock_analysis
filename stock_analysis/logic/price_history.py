@@ -42,3 +42,18 @@ class PriceHistoryLogic(object):
             .first()
         session.close()
         return bool(exists)
+
+    def get_gain_time_range(self, ticker, date_tuple):
+        session = Session()
+        result1 = session.query(PriceHistory.price)\
+            .filter_by(ticker=ticker)\
+            .filter_by(date=date_tuple[0])\
+            .first()
+        result2 = session.query(PriceHistory.price)\
+            .filter_by(ticker=ticker)\
+            .filter_by(date=date_tuple[1])\
+            .first()
+        session.close()
+        begin_price = float(result1[0])
+        end_price = float(result2[0])
+        return 100 * (end_price - begin_price) / begin_price

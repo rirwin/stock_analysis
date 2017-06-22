@@ -14,7 +14,7 @@ Session = sessionmaker(bind=db.engine)
 class TestPriceHistoryLogic(object):
 
     @db.in_sandbox
-    def test_add_pricess(self):
+    def test_add_prices(self):
         logic = PriceHistoryLogic()
         price = TickerDatePrice(
             ticker='AAPL',
@@ -72,3 +72,23 @@ class TestPriceHistoryLogic(object):
         date = datetime.date(2015, 8, 9)
 
         assert not logic.does_ticker_date_history_exists(TickerDate(ticker, date))
+
+    @db.in_sandbox
+    def test_get_gain_time_range(self):
+        logic = PriceHistoryLogic()
+        ticker = 'AAPL'
+        price1 = TickerDatePrice(
+            ticker=ticker,
+            date=datetime.date(2017, 6, 26),
+            price=150.0
+        )
+        price2 = TickerDatePrice(
+            ticker=ticker,
+            date=datetime.date(2017, 6, 30),
+            price=170.0
+        )
+        logic.add_prices([price1])
+        logic.add_prices([price2])
+
+        assert logic.get_gain_time_range('AAPL', (price1.date, price2.date)) == \
+            100 * (price2.price - price1.price) / (price1.price)
