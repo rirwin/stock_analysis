@@ -43,6 +43,15 @@ class PriceHistoryLogic(object):
         session.close()
         return bool(exists)
 
+    def get_ticker_price_on_date(self, ticker_date):
+        session = Session()
+        result = session.query(PriceHistory.price)\
+            .filter_by(ticker=ticker_date.ticker)\
+            .filter_by(date=ticker_date.date)\
+            .first()
+        session.close()
+        return float(result[0])
+
     def get_gain_time_range(self, ticker, date_tuple):
         session = Session()
         result1 = session.query(PriceHistory.price)\

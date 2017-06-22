@@ -74,6 +74,18 @@ class TestPriceHistoryLogic(object):
         assert not logic.does_ticker_date_history_exists(TickerDate(ticker, date))
 
     @db.in_sandbox
+    def test_get_ticker_price_on_date(self):
+        logic = PriceHistoryLogic()
+        price = TickerDatePrice(
+            ticker='AAPL',
+            date=datetime.date(2015, 8, 9),
+            price=150.001,
+        )
+        logic.add_prices([price])
+
+        assert logic.get_ticker_price_on_date(TickerDate(price.ticker, price.date)) == price.price
+
+    @db.in_sandbox
     def test_get_gain_time_range(self):
         logic = PriceHistoryLogic()
         ticker = 'AAPL'
