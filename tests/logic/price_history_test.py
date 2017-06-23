@@ -74,19 +74,7 @@ class TestPriceHistoryLogic(object):
         assert not logic.does_ticker_date_history_exists(TickerDate(ticker, date))
 
     @db.in_sandbox
-    def test_get_ticker_price_on_date(self):
-        logic = PriceHistoryLogic()
-        price = TickerDatePrice(
-            ticker='AAPL',
-            date=datetime.date(2015, 8, 9),
-            price=150.001,
-        )
-        logic.add_prices([price])
-
-        assert logic.get_ticker_price_on_date(TickerDate(price.ticker, price.date)) == price.price
-
-    @db.in_sandbox
-    def test_get_gain_time_range(self):
+    def test_get_ticker_dates_prices(self):
         logic = PriceHistoryLogic()
         ticker = 'AAPL'
         price1 = TickerDatePrice(
@@ -102,5 +90,43 @@ class TestPriceHistoryLogic(object):
         logic.add_prices([price1])
         logic.add_prices([price2])
 
-        assert logic.get_gain_time_range('AAPL', (price1.date, price2.date)) == \
-            100 * (price2.price - price1.price) / (price1.price)
+        ticker_date_prices = logic.get_ticker_dates_prices([
+            TickerDate(price1.ticker, price1.date),
+            TickerDate(price2.ticker, price2.date),
+        ])
+        assert set(ticker_date_prices) == set([price1, price2])
+
+    @db.in_sandbox
+    def test_get_tickers_gains(self):
+        logic = PriceHistoryLogic()
+        ticker1 = 'AAPL'
+        price1a = TickerDatePrice(
+            ticker=ticker1,
+            date=datetime.date(2017, 6, 26),
+            price=150.0
+        )
+        price1b = TickerDatePrice(
+            ticker=ticker1,
+            date=datetime.date(2017, 6, 30),
+            price=170.0
+        )
+        ticker2 = 'ATVI'
+        price2a = TickerDatePrice(
+            ticker=ticker2,
+            date=datetime.date(2017, 6, 26),
+            price=60.0
+        )
+        price2b = TickerDatePrice(
+            ticker=ticker2,
+            date=datetime.date(2017, 6, 30),
+            price=65.0
+        )
+        logic.add_prices([price1a, price1b, price2a, price2b])
+
+        gains = logic.get_tickers_gains(
+            [ticker1, ticker2],
+            (price1a.date, price1b.date),
+        )
+        gain1 = 100 * (price1b.price - price1a.price) / price1a.price
+        gain2 = 100 * (price2b.price - price2a.price) / price2a.price
+        assert set(gains) == set([(ticker1, gain1,), (ticker2, gain2,)])

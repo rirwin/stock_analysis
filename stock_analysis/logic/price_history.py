@@ -43,26 +43,41 @@ class PriceHistoryLogic(object):
         session.close()
         return bool(exists)
 
-    def get_ticker_price_on_date(self, ticker_date):
+    def get_ticker_dates_prices(self, ticker_dates):
         session = Session()
-        result = session.query(PriceHistory.price)\
-            .filter_by(ticker=ticker_date.ticker)\
-            .filter_by(date=ticker_date.date)\
-            .first()
+        ticker_date_prices = []
+        # TODO consider batching queries
+        for ticker_date in ticker_dates:
+            result = session.query(PriceHistory.price)\
+                .filter_by(ticker=ticker_date.ticker)\
+                .filter_by(date=ticker_date.date)\
+                .first()
+            ticker_date_prices.append(
+                TickerDatePrice(
+                    ticker=ticker_date.ticker,
+                    date=ticker_date.date,
+                    price=float(result[0])
+                )
+            )
         session.close()
-        return float(result[0])
+        return ticker_date_prices
 
-    def get_gain_time_range(self, ticker, date_tuple):
+    def get_tickers_gains(self, tickers, date_range):
         session = Session()
-        result1 = session.query(PriceHistory.price)\
-            .filter_by(ticker=ticker)\
-            .filter_by(date=date_tuple[0])\
-            .first()
-        result2 = session.query(PriceHistory.price)\
-            .filter_by(ticker=ticker)\
-            .filter_by(date=date_tuple[1])\
-            .first()
+        results = session.query(PriceHistory.ticker, PriceHistory.price)\
+            .filter(PriceHistory.ticker.in_(tickers))\
+            .filter(PriceHistory.date.in_(date_range))\
+            .order_by(PriceHistory.ticker, PriceHistory.date)\
+            .all()
         session.close()
-        begin_price = float(result1[0])
-        end_price = float(result2[0])
-        return 100 * (end_price - begin_price) / begin_price
+
+        assert len(tickers) * 2 == len(results)
+        idx = 0
+        gains = []
+        while idx < len(results):
+            begin_price = results[idx][1]
+            end_price = results[idx + 1][1]
+            gain = 100 * (end_price - begin_price) / begin_price
+            gains.append((results[idx][0], gain,))
+            idx += 2
+        return gains
