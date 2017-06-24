@@ -7,20 +7,23 @@ from database.order_history import OrderHistory
 from database import db
 
 
-Order = namedtuple('Order', ['ticker', 'date', 'num_shares', 'price'])
+Order = namedtuple('Order', ['user_id', 'order_type', 'ticker', 'date', 'num_shares', 'price'])
 TickerDate = namedtuple('TickerDate', ['ticker', 'date'])
 Session = sessionmaker(bind=db.engine)
+
+BUY_ORDER_TYPE = 'B'
+SELL_ORDER_TYPE = 'S'
 
 
 class OrderHistoryLogic(object):
 
-    # TODO add user_id to Order, consistency
-    def add_orders(self, user_id, orders):
+    def add_orders(self, orders):
         session = Session()
         for order in orders:
             session.add(
                 OrderHistory(
-                    user_id=user_id,
+                    user_id=order.user_id,
+                    order_type=order.order_type,
                     date=order.date,
                     ticker=order.ticker,
                     num_shares=order.num_shares,

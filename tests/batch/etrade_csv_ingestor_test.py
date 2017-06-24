@@ -6,7 +6,6 @@ import pytest
 from batch.etrade_csv_ingestor import EtradeIngestor
 from batch.etrade_csv_ingestor import RowParserException
 from stock_analysis.logic import order_history
-from stock_analysis import constants
 
 
 class TestEtradeCsvIngestor(object):
@@ -35,7 +34,7 @@ class TestEtradeCsvIngestor(object):
             batch.run()
             assert patch_parse_args.called
             assert patch_parse_orders.call_args_list == [mock.call(csv_path)]
-            assert patch_add_orders.call_args_list == [mock.call(constants.USER_ID, mock_parsed_orders)]
+            assert patch_add_orders.call_args_list == [mock.call(mock_parsed_orders)]
 
     def test_parse_orders_from_csv(self):
         csv_path = '/path/to/csv'
@@ -65,8 +64,21 @@ class TestEtradeCsvIngestor(object):
         ]
         orders = batch.parse_orders_from_csv_reader(reader)
         assert set(orders) == set([
-            order_history.Order('NFLX', datetime.datetime(2017, 6, 12).date(), 19, 153.6799),
-            order_history.Order('NFLX', datetime.datetime(2017, 6, 8).date(), 39, 151.9),
+            order_history.Order(
+                batch.user_id,
+                order_history.BUY_ORDER_TYPE,
+                'NFLX',
+                datetime.datetime(2017, 6, 12).date(),
+                19,
+                153.6799
+            ),
+            order_history.Order(
+                batch.user_id,
+                order_history.BUY_ORDER_TYPE,
+                'NFLX',
+                datetime.datetime(2017, 6, 8).date(),
+                39, 151.9
+            ),
         ])
 
     def test_extract_order_from_row_skips_malformed_row(self):
@@ -94,6 +106,19 @@ class TestEtradeCsvIngestor(object):
         ]
         orders = batch.parse_orders_from_csv_reader(reader)
         assert set(orders) == set([
-            order_history.Order('NFLX', datetime.datetime(2017, 6, 12).date(), 19, 153.6799),
-            order_history.Order('NFLX', datetime.datetime(2017, 6, 8).date(), 39, 151.9),
+            order_history.Order(
+                batch.user_id,
+                order_history.BUY_ORDER_TYPE,
+                'NFLX',
+                datetime.datetime(2017, 6, 12).date(),
+                19,
+                153.6799
+            ),
+            order_history.Order(
+                batch.user_id,
+                order_history.BUY_ORDER_TYPE,
+                'NFLX',
+                datetime.datetime(2017, 6, 8).date(),
+                39, 151.9
+            ),
         ])

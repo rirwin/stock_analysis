@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from database import db
 from stock_analysis.logic.portfolio import PortfolioLogic
+from stock_analysis.logic import order_history
 from stock_analysis.logic.order_history import Order
 from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.price_history import PriceHistoryLogic
@@ -22,6 +23,8 @@ class TestPortfolioLogic(object):
     @db.in_sandbox
     def test_percent_gain_single_purchase(self):
         order = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
             date=datetime.date(2017, 6, 12),
             ticker='AAPL',
             num_shares=1,
@@ -36,21 +39,25 @@ class TestPortfolioLogic(object):
             for x in range(5)
         ]
 
-        self.order_logic.add_orders(self.user_id, [order])
+        self.order_logic.add_orders([order])
         self.price_logic.add_prices(prices)
 
         assert self.portfolio_logic.get_percent_gain(self.user_id, order.ticker) == \
             100 * (prices[-1].price - order.price) / order.price
 
     @db.in_sandbox
-    def test_percent_gain_double_purchase(self):
+    def test_percent_gain_multiple_orders(self):
         order1 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
             date=datetime.date(2017, 6, 12),
             ticker='AAPL',
             num_shares=2,
             price=150.0,
         )
         order2 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
             date=datetime.date(2017, 6, 19),
             ticker='AAPL',
             num_shares=3,
@@ -71,7 +78,7 @@ class TestPortfolioLogic(object):
             )
             for x in range(5)
         ]
-        self.order_logic.add_orders(self.user_id, [order1, order2])
+        self.order_logic.add_orders([order1, order2])
         self.price_logic.add_prices(prices)
 
         initial_value = order1.price * order1.num_shares + order2.price * order2.num_shares
@@ -82,12 +89,16 @@ class TestPortfolioLogic(object):
     @db.in_sandbox
     def test_get_stock_value(self):
         order1 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
             date=datetime.date(2017, 6, 12),
             ticker='AAPL',
             num_shares=2,
             price=150.0,
         )
         order2 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
             date=datetime.date(2017, 6, 19),
             ticker='AAPL',
             num_shares=3,
@@ -108,7 +119,7 @@ class TestPortfolioLogic(object):
             )
             for x in range(5)
         ]
-        self.order_logic.add_orders(self.user_id, [order1, order2])
+        self.order_logic.add_orders([order1, order2])
         self.price_logic.add_prices(prices)
 
         final_value = (order1.num_shares + order2.num_shares) * prices[-1].price
