@@ -8,7 +8,7 @@ from stock_analysis.logic.order_history import OrderHistoryLogic
 
 
 # TODO handle symbols that are sold
-blacklisted_tickers = ['UAA', 'UA', 'CASY']
+blacklisted_tickers = ['UAA', 'UA', 'CASY', 'ZOES']
 
 # Not sure why AMT is broken in the api
 blacklisted_tickers.append('AMT')

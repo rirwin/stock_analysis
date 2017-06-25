@@ -3,16 +3,16 @@ USER_ID = 1
 ticker_name_to_exchange = {}
 nasdaq_tickers = [
     'AAPL', 'ADBE', 'ALGN', 'AMZN', 'ATVI', 'BIDU', 'BLUE', 'BOFI',
-    'CELG', 'CGNX', 'COST', 'FB', 'FEYE', 'GOOG', 'HAIN',
+    'CELG', 'CGNX', 'COST', 'EXEL', 'FB', 'FEYE', 'GOOG', 'HAIN',
     'HAS', 'ILMN', 'ISRG', 'JBLU', 'MAR', 'MASI', 'MELI',
     'MIDD', 'MOMO', 'NFLX', 'NVDA', 'OLED', 'PYPL', 'SBUX',
-    'SPLK', 'SSNC', 'SWKS', 'TSLA', 'TTD', 'UBNT', 'ULTA',
+    'SPLK', 'SSNC', 'STMP', 'SWKS', 'TSLA', 'TTD', 'UBNT', 'ULTA',
     'YELP', 'Z',
 ]
 nyse_tickers = [
     'AMT',
-    'BUD', 'CMG', 'DIS', 'EBS', 'FDS', 'ICE', 'IJR', 'KMI', 'KMX',
-    'MA', 'MKL', 'NKE', 'NYT', 'SHOP', 'SKX', 'TWLO', 'VEA', 'VEEV',
+    'BUD', 'CMG', 'DIS', 'EBS', 'FDS', 'ELLI', 'ICE', 'IJR', 'KMI', 'KMX',
+    'MA', 'MKL', 'NKE', 'NYT', 'PAYC', 'SHOP', 'SKX', 'TWLO', 'TXT', 'VEA', 'VEEV',
     'WDAY', 'ZOES',
 ]
 for s in nasdaq_tickers:
