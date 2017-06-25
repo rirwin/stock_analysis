@@ -1,5 +1,6 @@
 from collections import namedtuple
 import datetime
+from sqlalchemy import desc
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
@@ -30,7 +31,7 @@ class PriceHistoryLogic(object):
         date_str = session.query(func.max(PriceHistory.date))\
             .filter_by(ticker=ticker)\
             .first()
-        date = datetime.datetime.strptime(date_str[0], '%Y-%m-%d').date()
+        date = self._make_date_from_isoformatted_string(date_str[0])
         session.close()
         return date
 
@@ -81,3 +82,19 @@ class PriceHistoryLogic(object):
             gains.append((results[idx][0], gain,))
             idx += 2
         return gains
+
+    def get_dates_last_two_sessions(self):
+        session = Session()
+        results = session.query(PriceHistory.date)\
+            .group_by(PriceHistory.date)\
+            .order_by(desc(PriceHistory.date))\
+            .limit(2)\
+            .all()
+        session.close()
+        assert len(results) == 2
+        last_session_date = self._make_date_from_isoformatted_string(results[0][0])
+        the_day_before = self._make_date_from_isoformatted_string(results[1][0])
+        return (last_session_date, the_day_before)
+
+    def _make_date_from_isoformatted_string(self, date_str):
+        return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()

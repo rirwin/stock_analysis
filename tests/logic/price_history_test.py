@@ -130,3 +130,27 @@ class TestPriceHistoryLogic(object):
         gain1 = 100 * (price1b.price - price1a.price) / price1a.price
         gain2 = 100 * (price2b.price - price2a.price) / price2a.price
         assert set(gains) == set([(ticker1, gain1,), (ticker2, gain2,)])
+
+    @db.in_sandbox
+    def test_get_dates_last_two_sessions(self):
+        logic = PriceHistoryLogic()
+        price0 = TickerDatePrice(
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 21),
+            price=149.001,
+        )
+        price1 = TickerDatePrice(
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 22),
+            price=150.001,
+        )
+        price2 = TickerDatePrice(
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 23),
+            price=152.333,
+        )
+        logic.add_prices([price0, price1, price2])
+
+        dates = logic.get_dates_last_two_sessions()
+
+        assert dates == (price2.date, price1.date)
