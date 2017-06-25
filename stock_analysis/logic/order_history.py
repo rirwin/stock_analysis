@@ -56,3 +56,25 @@ class OrderHistoryLogic(object):
         ]
         session.close()
         return ticker_dates
+
+    def get_orders_for_user(self, user_id):
+        session = Session()
+        results = session.query(OrderHistory)\
+            .filter_by(user_id=user_id)\
+            .all()
+        session.close()
+        return [
+            Order(
+                user_id=r.user_id,
+                order_type=r.order_type,
+                ticker=r.ticker,
+                date=self._make_date_from_isoformatted_string(r.date),
+                num_shares=r.num_shares,
+                price=r.price,
+            )
+            for r in results
+        ]
+
+    # TODO move to logic helper
+    def _make_date_from_isoformatted_string(self, date_str):
+        return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()

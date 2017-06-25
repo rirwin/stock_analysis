@@ -92,3 +92,33 @@ class TestOrderHistoryLogic(object):
 
         ticker_dates = logic.get_all_order_tickers_min_date()
         assert ticker_dates == [TickerDate(order1.ticker, order1.date)]
+
+    @db.in_sandbox
+    def test_get_orders_for_user(self):
+        logic = OrderHistoryLogic()
+        order1 = Order(
+            user_id=1,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 12),
+            num_shares=2,
+            price=150.0,
+        )
+        order2 = Order(
+            user_id=1,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 19),
+            num_shares=3,
+            price=170.0,
+        )
+        order3 = Order(
+            user_id=2,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 19),
+            num_shares=3,
+            price=170.0,
+        )
+        logic.add_orders([order1, order2, order3])
+        assert set(logic.get_orders_for_user(1)) == set([order1, order2])
