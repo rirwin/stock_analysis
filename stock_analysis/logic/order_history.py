@@ -77,7 +77,8 @@ class OrderHistoryLogic(object):
 
     def get_portfolio_shares_owned_on_date(self, user_id, date):
         session = Session()
-        results = session.execute("""
+        results = session.execute(
+            """
             SELECT
                         ticker,
                         SUM(
@@ -100,7 +101,6 @@ class OrderHistoryLogic(object):
         ).fetchall()
         session.close()
         return results
-
 
     # TODO move to logic helper
     def _make_date_from_isoformatted_string(self, date_str):
