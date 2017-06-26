@@ -122,3 +122,35 @@ class TestOrderHistoryLogic(object):
         )
         logic.add_orders([order1, order2, order3])
         assert set(logic.get_orders_for_user(1)) == set([order1, order2])
+
+    @db.in_sandbox
+    def test_get_portfolio_shares_owned_on_date(self):
+        logic = OrderHistoryLogic()
+        order1 = Order(
+            user_id=1,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 12),
+            num_shares=2,
+            price=150.0,
+        )
+        order2 = Order(
+            user_id=1,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='ATVI',
+            date=datetime.date(2017, 6, 19),
+            num_shares=3,
+            price=170.0,
+        )
+        order3 = Order(
+            user_id=1,
+            order_type=order_history.SELL_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 26),
+            num_shares=1,
+            price=180.0,
+        )
+        logic.add_orders([order1, order2, order3])
+        results = logic.get_portfolio_shares_owned_on_date(order1.user_id, datetime.date(2017, 6, 27))
+
+        assert results == [('AAPL', 1), ('ATVI', 3)]

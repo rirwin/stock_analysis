@@ -75,6 +75,33 @@ class OrderHistoryLogic(object):
             for r in results
         ]
 
+    def get_portfolio_shares_owned_on_date(self, user_id, date):
+        session = Session()
+        results = session.execute("""
+            SELECT
+                        ticker,
+                        SUM(
+                            CASE
+                                WHEN order_type = 'B' THEN num_shares
+                                WHEN order_type = 'S' THEN -1 * num_shares
+                            END
+                        ) as num_shares
+            FROM
+                        order_history
+            WHERE
+                        user_id = :user_id AND
+                        date <= :date
+            GROUP BY
+                        ticker
+            ORDER BY
+                        ticker
+            """,
+            {'user_id': user_id, 'date': date.isoformat()},
+        ).fetchall()
+        session.close()
+        return results
+
+
     # TODO move to logic helper
     def _make_date_from_isoformatted_string(self, date_str):
         return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
