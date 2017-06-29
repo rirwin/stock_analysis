@@ -7,6 +7,7 @@ from stock_analysis.logic import order_history
 from stock_analysis.logic.order_history import Order
 from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.order_history import TickerDate
+from stock_analysis.logic.order_history import TickerShareCount
 
 
 Session = sessionmaker(bind=db.engine)
@@ -153,4 +154,4 @@ class TestOrderHistoryLogic(object):
         logic.add_orders([order1, order2, order3])
         results = logic.get_portfolio_shares_owned_on_date(order1.user_id, datetime.date(2017, 6, 27))
 
-        assert results == [('AAPL', 1), ('ATVI', 3)]
+        assert results == [TickerShareCount('AAPL', 1), TickerShareCount('ATVI', 3)]

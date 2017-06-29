@@ -1,11 +1,14 @@
+from collections import defaultdict
 from collections import namedtuple
 import datetime
+import itertools
 from sqlalchemy import desc
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
 from database.price_history import PriceHistory
 from database import db
+from stock_analysis.logic.order_history import TickerDate
 
 
 TickerDatePrice = namedtuple('TickerDatePrice', ['ticker', 'date', 'price'])
@@ -43,6 +46,14 @@ class PriceHistoryLogic(object):
             .first()
         session.close()
         return bool(exists)
+
+    def get_ticker_price_history_map(self, tickers, dates):
+        ticker_dates = [TickerDate(x[0], x[1]) for x in itertools.product(tickers, dates)]
+        prices = self.get_ticker_dates_prices(ticker_dates)
+        price_info = defaultdict(dict)
+        for price in prices:
+            price_info[price.ticker][price.date] = price.price
+        return price_info
 
     def get_ticker_dates_prices(self, ticker_dates):
         session = Session()

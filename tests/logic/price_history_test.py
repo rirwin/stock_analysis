@@ -97,6 +97,42 @@ class TestPriceHistoryLogic(object):
         assert set(ticker_date_prices) == set([price1, price2])
 
     @db.in_sandbox
+    def test_get_ticker_price_history_map(self):
+        logic = PriceHistoryLogic()
+        ticker1 = 'AAPL'
+        ticker2 = 'ATVI'
+        date1 = datetime.date(2017, 6, 26)
+        date2 = datetime.date(2017, 6, 27)
+
+        price1 = TickerDatePrice(
+            ticker=ticker1,
+            date=date1,
+            price=150.0
+        )
+        price2 = TickerDatePrice(
+            ticker=ticker1,
+            date=date2,
+            price=170.0
+        )
+        price3 = TickerDatePrice(
+            ticker=ticker2,
+            date=date1,
+            price=120.0
+        )
+        price4 = TickerDatePrice(
+            ticker=ticker2,
+            date=date2,
+            price=130.0
+        )
+        logic.add_prices([price1, price2, price3, price4])
+        history_map = logic.get_ticker_price_history_map([ticker1, ticker2], [date1, date2])
+        expected_map = {
+            ticker1: {date1: price1.price, date2: price2.price},
+            ticker2: {date1: price3.price, date2: price4.price},
+        }
+        assert history_map == expected_map
+
+    @db.in_sandbox
     def test_get_tickers_gains(self):
         logic = PriceHistoryLogic()
         ticker1 = 'AAPL'

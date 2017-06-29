@@ -8,6 +8,7 @@ from database import db
 
 
 Order = namedtuple('Order', ['user_id', 'order_type', 'ticker', 'date', 'num_shares', 'price'])
+TickerShareCount = namedtuple('TickerShares', ['ticker', 'num_shares'])
 TickerDate = namedtuple('TickerDate', ['ticker', 'date'])
 Session = sessionmaker(bind=db.engine)
 
@@ -100,7 +101,7 @@ class OrderHistoryLogic(object):
             {'user_id': user_id, 'date': date.isoformat()},
         ).fetchall()
         session.close()
-        return results
+        return [TickerShareCount(x[0], x[1]) for x in results]
 
     # TODO move to logic helper
     def _make_date_from_isoformatted_string(self, date_str):
