@@ -1,9 +1,7 @@
 from collections import defaultdict
 from collections import namedtuple
-import itertools
 from stock_analysis.logic import order_history
 from stock_analysis.logic import price_history
-from stock_analysis.logic.order_history import TickerDate
 
 
 PortfolioStockDetails = namedtuple(
@@ -39,35 +37,38 @@ class PortfolioCommands(object):
 
         retained_order_purchase_value = {}
         for k in order_info.keys():
-            num_sold_to_remove = sum(o.num_shares for o in order_info[k] if o.order_type == order_history.SELL_ORDER_TYPE)
+            num_sold_to_remove = sum(
+                o.num_shares for o in order_info[k]
+                if o.order_type == order_history.SELL_ORDER_TYPE
+            )
             buy_orders = [o for o in order_info[k] if o.order_type == order_history.BUY_ORDER_TYPE]
             # assume sold oldest shares
-            buy_orders.sort(key=lambda order:order.date)
+            buy_orders.sort(key=lambda order: order.date)
             for buy_order in buy_orders:
                 if num_sold_to_remove > 0:
-                    if buy_order.num_share - num_sold_shares >= 0:
-                        buy_order.num_shares -= num_sold_shares
-                        num_sold_shares = 0
+                    if buy_order.num_share - num_sold_to_remove >= 0:
+                        buy_order.num_shares -= num_sold_to_remove
+                        num_sold_to_remove = 0
                     else:
                         shares_to_remove = buy_order.num_shares
                         buy_order.num_shares = 0
-                        num_sold_shares -= shares_to_remove
+                        num_sold_to_remove -= shares_to_remove
 
             retained_order_purchase_value[k] = sum(o.num_shares * o.price for o in buy_orders)
 
-
-        import ipdb;ipdb.set_trace()
         port_value = sum(price_info[ticker][end_date] * ticker_to_num_shares[ticker] for ticker in tickers)
 
         return [
             PortfolioStockDetails(
                 ticker=ticker,
                 price=price_info[ticker][end_date],
-                gain1dp=100 * (price_info[ticker][end_date] - price_info[ticker][start_date]) / price_info[ticker][start_date],
+                gain1dp=100 * (price_info[ticker][end_date] - price_info[ticker][start_date]) /
+                    price_info[ticker][start_date],
                 gain1dv=ticker_to_num_shares[ticker] * (price_info[ticker][end_date] - price_info[ticker][start_date]),
-                gainp=100 * (price_info[ticker][end_date] * ticker_to_num_shares[ticker] - retained_order_purchase_value[ticker]) / \
-                    retained_order_purchase_value[ticker],
-                gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] - retained_order_purchase_value[ticker],
+                gainp=100 * (price_info[ticker][end_date] * ticker_to_num_shares[ticker] -
+                    retained_order_purchase_value[ticker]) / retained_order_purchase_value[ticker],
+                gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] -
+                retained_order_purchase_value[ticker],
                 portfoliop=100 * (ticker_to_num_shares[ticker] * price_info[ticker][end_date]) / port_value,
                 value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
             )
