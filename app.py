@@ -12,6 +12,10 @@ portfolio_commands = portfolio.PortfolioCommands()
 def home():
     return "Hello, World!"  # return a string
 
+@app.route('/table_sorted')
+def table_sorted():
+    return render_template('semantic.html')
+
 @app.route('/welcome')
 def welcome():
     details = portfolio_commands.get_portfolio_details(1)

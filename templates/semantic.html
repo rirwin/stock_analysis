@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Portfolio Performance</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" text="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css">
-  </head>
+<head>
+<link rel="stylesheet" text="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css">
+</head>
 <body>
-    <div class="ui container">
-      <h2>Portfolio</h2>
-    </div>
 <div class="ui container">
-  <h3>Details</h3>
-  <table class="ui sortable celled table table-hover">
-    <thead>
-<!-- idea build the table in python -->
-      <th data-sort="string">{{ fields[0] }}</th>
-      {% for field in fields[1:] %}
-        <th data-sort="alphanum">{{ field }}</th>
-      {% endfor %}
-    </thead>
-    <tbody>
-        {% for detail in details %}
-        <tr>
-            {% for field in fields %}
-            <td> ${{ detail.__getattribute__(field) }}%</td> 
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-  </table>
+<table class="ui sortable celled table">
+  <thead>
+    <tr>
+      <th data-sort="string">Ticker</th>
+      <th data-sort="int" class="number">Value</th>
+      <th data-sort="float" class="number">percent</th>
+      <th data-sort="float" class="number">increase today</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AAPL</td>
+      <td>114</td>
+      <td class=positive>0.1</td>
+      <td class="positive">2.4</td>
+    </tr>
+    <tr>
+      <td>ADBE</td>
+      <td>234</td>
+      <td class="negative">-0.4</td>
+      <td class="negative">-91.3</td>
+    </tr>
+    <tr>
+      <td>BADD</td>
+      <td>12</td>
+      <td class="positive">3.0</td>
+      <td class="positive">14.2</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js"></script>
 <script>
 (function(c){c.fn.stupidtable=function(b){return this.each(function(){var a=c(this);b=b||{};b=c.extend({},c.fn.stupidtable.default_sort_fns,b);a.data("sortFns",b);a.stupidtable_build();a.on("click.stupidtable","thead th",function(){c(this).stupidsort()});a.find("th[data-sort-onload=yes]").eq(0).stupidsort()})};c.fn.stupidtable_settings=function(b){return this.each(function(){var a=c(this),f=c.extend({},c.fn.stupidtable.default_settings,b);a.stupidtable.settings=f})};c.fn.stupidsort=function(b){var a=
 c(this),f=0,g=c.fn.stupidtable.dir,d=a.closest("table"),h=a.data("sort")||null;d.stupidtable.settings||(d.stupidtable.settings=c.extend({},c.fn.stupidtable.default_settings));if(null!==h){var k=d.data("sortFns")[h];a.parents("tr").find("th").slice(0,c(this).index()).each(function(){var a=c(this).attr("colspan")||1;f+=parseInt(a,10)});var e;1==arguments.length?e=b:(e=b||a.data("sort-default")||g.ASC,a.data("sort-dir")&&(e=a.data("sort-dir")===g.ASC?g.DESC:g.ASC));a.data("sort-dir",e);d.trigger("beforetablesort",
@@ -40,17 +46,9 @@ d.children("tbody").append(trs),d.find("th").data("sort-dir",null).removeClass("
 DESC:"desc"};c.fn.stupidtable.default_sort_fns={"int":function(b,a){return parseInt(b,10)-parseInt(a,10)},"float":function(b,a){return parseFloat(b)-parseFloat(a)},string:function(b,a){return b.toString().localeCompare(a.toString())},"string-ins":function(b,a){b=b.toString().toLocaleLowerCase();a=a.toString().toLocaleLowerCase();return b.localeCompare(a)}};c.fn.stupidtable_build=function(){return this.each(function(){var b=c(this),a=[];b.children("tbody").children("tr").each(function(b,g){var d={$tr:c(g),
 columns:[],index:b};c(g).children("td").each(function(a,b){var e=c(b).data("sort-value");"undefined"===typeof e&&(e=c(b).text(),c(b).data("sort-value",e));d.columns.push(e)});a.push(d)});b.data("stupidsort_internaltable",a)})}})(jQuery);
 
-
 $(document).ready(function(){
-    $('table').stupidtable({
-        "alphanum":function(a,b){
-            a = a.replace(/[$%]/g, '')
-            b = b.replace(/[$%]/g, '')
-            return parseFloat(a, 10) - parseFloat(b ,10);
-        }
-    })
+    $('table').stupidtable()
 });
 </script>
 </body>
 </html>
-
