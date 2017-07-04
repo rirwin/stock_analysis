@@ -56,7 +56,8 @@ def _make_table_from_details(details):
             is_highlighted = '1d' in field
 
             if is_highlighted:
-                tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 else 'style="color:red;text-align:right;"'
+                tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 \
+                    else 'style="color:red;text-align:right;"'
                 td_tag = '<td {}>'.format(tag_coloring)
             else:
                 td_tag = '<td style="text-align:right;">'
