@@ -52,24 +52,27 @@ def _make_table_from_details(details):
 
         for field in fields[1:]:
             td_data = detail.__getattribute__(field)
-            is_percent = field.endswith('p')
-            is_highlighted = '1d' in field
-
-            if is_highlighted:
-                tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 \
-                    else 'style="color:red;text-align:right;"'
-                td_tag = '<td {}>'.format(tag_coloring)
-            else:
-                td_tag = '<td style="text-align:right;">'
-
-            td_template = '{0:.2f}%' if is_percent else '${0:.2f}'
-            td_data_formatted = td_template.format(td_data)
-
-            table_lines.append('{0}{1}</td>'.format(td_tag, td_data_formatted))
+            table_lines.append(_make_td_html(td_data, field))
         table_lines.append('</tr>')
     table_lines.append('</tbody>')
     table_lines.append('</table>')
     return table_lines
+
+
+def _make_td_html(td_data, field):
+    is_percent = field.endswith('p')
+    is_highlighted = '1d' in field
+
+    if is_highlighted:
+        tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 \
+            else 'style="color:red;text-align:right;"'
+        td_tag = '<td {}>'.format(tag_coloring)
+    else:
+        td_tag = '<td style="text-align:right;">'
+
+    td_template = '{0:.2f}%' if is_percent else '${0:.2f}'
+    td_data_formatted = td_template.format(td_data)
+    return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
 if __name__ == '__main__':
