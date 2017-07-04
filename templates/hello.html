@@ -11,24 +11,9 @@
     </div>
 <div class="ui container">
   <h3>Details</h3>
-  <table class="ui sortable celled table table-hover">
-    <thead>
-<!-- idea build the table in python -->
-      <th data-sort="string">{{ fields[0] }}</th>
-      {% for field in fields[1:] %}
-        <th data-sort="customfloat">{{ field }}</th>
-      {% endfor %}
-    </thead>
-    <tbody>
-        {% for detail in details %}
-        <tr>
-            {% for field in fields %}
-            <td> ${{ detail.__getattribute__(field) }}%</td> 
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-  </table>
+{% for line in table_lines %}
+{{ line|safe }}
+{% endfor %}
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js"></script>-->
