@@ -1,0 +1,9 @@
+.cache/
+.coverage
+*.egg-info/*
+*__pycache__*
+*.pyc
+*.sqlite3db
+.tox/
+virtualenv_run/
+*.swp
