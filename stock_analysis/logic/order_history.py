@@ -101,7 +101,8 @@ class OrderHistoryLogic(object):
             {'user_id': user_id, 'date': date.isoformat()},
         ).fetchall()
         session.close()
-        return [TickerShareCount(x[0], x[1]) for x in results]
+
+        return {x[0]: x[1] for x in results}
 
     # TODO move to logic helper
     def _make_date_from_isoformatted_string(self, date_str):

@@ -154,4 +154,4 @@ class TestOrderHistoryLogic(object):
         logic.add_orders([order1, order2, order3])
         results = logic.get_portfolio_shares_owned_on_date(order1.user_id, datetime.date(2017, 6, 27))
 
-        assert results == [TickerShareCount('AAPL', 1), TickerShareCount('ATVI', 3)]
+        assert results == {'AAPL': 1, 'ATVI': 3}
