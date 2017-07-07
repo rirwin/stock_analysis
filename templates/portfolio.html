@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Portfolio Performance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='semantic.min.css') }}">
+  </head>
+<body>
+    <div class="ui container">
+      <h2>Portfolio</h2>
+    </div>
+<div class="ui container">
+  <h3>Details</h3>
+{% for line in table_lines %}
+{{ line|safe }}
+{% endfor %}
+</div>
+<script src="../static/jquery.min.js"></script>
+<script src="../static/stupidtable.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('table').stupidtable({
+        "customfloat":function(a,b){
+            a = a.replace(/[$%]/g, '')
+            b = b.replace(/[$%]/g, '')
+            return parseFloat(a, 10) - parseFloat(b ,10);
+        }
+    })
+});
+</script>
+</body>
+</html>
+
