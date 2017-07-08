@@ -80,5 +80,6 @@ def _make_summary_from_details(details):
             summary[k] = '${0:.2f}'.format(summary[k])
     return summary
 
+
 if __name__ == '__main__':
     app.run(debug=True)

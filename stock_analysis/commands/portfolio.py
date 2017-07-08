@@ -1,4 +1,3 @@
-from collections import defaultdict
 from collections import namedtuple
 from stock_analysis.logic import order_history
 from stock_analysis.logic import price_history
@@ -16,7 +15,6 @@ class PortfolioCommands(object):
     price_logic = price_history.PriceHistoryLogic()
 
     def get_portfolio_details(self, user_id):
-        # TODO refactor this whole method and logic calls
         (end_date, start_date) = self.price_logic.get_dates_last_two_sessions()
         ticker_to_num_shares = self.order_logic.get_portfolio_shares_owned_on_date(user_id, end_date)
         tickers = sorted(ticker_to_num_shares.keys())
@@ -25,37 +23,7 @@ class PortfolioCommands(object):
 
         dates = [start_date, end_date]  # Add 1 week, 1mo, 3mo
         price_info = self.price_logic.get_ticker_price_history_map(tickers, dates)
-        orders = self.order_logic.get_orders_for_user(user_id)
-
-        # we have shares owned, ignore sell orders for porfolio details
-        order_info = defaultdict(list)
-
-        # sum bought shares
-        for order in orders:
-            order_info[order.ticker].append(order)
-
-        retained_order_purchase_value = {}
-        for k in order_info.keys():
-            buy_orders = [o for o in order_info[k] if o.order_type == order_history.BUY_ORDER_TYPE]
-            # assume sold oldest shares
-            buy_orders.sort(key=lambda order: order.date)
-
-            # TODO decide how to handle sell orders
-            # num_sold_to_remove = sum(
-            #     o.num_shares for o in order_info[k]
-            #     if o.order_type == order_history.SELL_ORDER_TYPE
-            # )
-            # for buy_order in buy_orders:
-            #    if num_sold_to_remove > 0:
-            #        if buy_order.num_shares - num_sold_to_remove >= 0:
-            #            buy_order.num_shares -= num_sold_to_remove
-            #            num_sold_to_remove = 0
-            #        else:
-            #            shares_to_remove = buy_order.num_shares
-            #            buy_order.num_shares = 0
-            #            num_sold_to_remove -= shares_to_remove
-
-            retained_order_purchase_value[k] = sum(o.num_shares * o.price for o in buy_orders)
+        purchase_value, _ = self.order_logic.get_ticker_total_purchased_sold(user_id)
 
         port_value = sum(price_info[ticker][end_date] * ticker_to_num_shares[ticker] for ticker in tickers)
 
@@ -67,9 +35,9 @@ class PortfolioCommands(object):
                     price_info[ticker][start_date],
                 gain1dv=ticker_to_num_shares[ticker] * (price_info[ticker][end_date] - price_info[ticker][start_date]),
                 gainp=100 * (price_info[ticker][end_date] * ticker_to_num_shares[ticker] -
-                    retained_order_purchase_value[ticker]) / retained_order_purchase_value[ticker],
+                    purchase_value[ticker]) / purchase_value[ticker],
                 gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] -
-                retained_order_purchase_value[ticker],
+                purchase_value[ticker],
                 portfoliop=100 * (ticker_to_num_shares[ticker] * price_info[ticker][end_date]) / port_value,
                 value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
             )
