@@ -1,7 +1,10 @@
 from collections import defaultdict
 from flask import Flask, render_template
+import locale
 from stock_analysis.commands import portfolio
 
+
+locale.setlocale(locale.LC_ALL, '')
 app = Flask(__name__)
 portfolio_commands = portfolio.PortfolioCommands()
 
@@ -66,8 +69,7 @@ def _make_td_html(td_data, field):
     else:
         td_tag = '<td style="text-align:right;">'
 
-    td_template = '{0:.2f}%' if is_percent else '${0:.2f}'
-    td_data_formatted = td_template.format(td_data)
+    td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent else '$' + locale.format('%.2f', td_data, grouping=True)
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
@@ -83,10 +85,11 @@ def _make_cards_summary_from_details(details):
         if k.endswith('p'):
             summary[k] = '{0:.2f}%'.format(summary[k])
         elif 'gain' in k or k == 'value':
-            summary[k] = '${0:.2f}'.format(summary[k])
+            summary[k] = '$' + locale.format('%.2f', summary[k], grouping=True)
     cards = []
-    for k, v in summary.items():
-        cards.append(card_template.format(key=k, value=v))
+    for card_title in ['value', 'gainp', 'gainv', 'gain1dp', 'gain1dv']:
+        cards.append(card_template.format(key=card_title, value=summary[card_title]))
+
     return cards
 
 
