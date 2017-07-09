@@ -26,5 +26,8 @@ run_dev: virtualenv_run
 run_prod: virtualenv_run
 	USE_PROD_DB=1 virtualenv_run/bin/python app.py
 
+update_dev_data: virtualenv_run
+	USE_DEV_DB=1 virtualenv_run/bin/python -m batch.google_price_history_fetcher
+
 update_prod_data: virtualenv_run
 	USE_PROD_DB=1 virtualenv_run/bin/python -m batch.google_price_history_fetcher

@@ -39,7 +39,11 @@ class GooglePriceHistoryFetcher(object):
         ticker_min_order_dates = self.order_logic.get_all_order_tickers_min_date()
         for ticker_date in ticker_min_order_dates:
             self.process_ticker_order_date(ticker_date)
+        min_date = min(t.date for t in ticker_min_order_dates)
+        for ticker in constants.BENCHMARK_TICKERS:
+            self.process_ticker_order_date(TickerDate(ticker, min_date))
 
+    # TODO, change name, doesn't matter if it's an order at this point
     def process_ticker_order_date(self, ticker_date):
         self.log.info("Processing ticker %s" % ticker_date.ticker)
         fetch_date = self.get_fetch_date(ticker_date)

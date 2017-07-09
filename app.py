@@ -6,6 +6,12 @@ app = Flask(__name__)
 portfolio_commands = portfolio.PortfolioCommands()
 
 
+card_template = """<div class="ui card"  style="width:auto">
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:small">{key}</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium">{value}</div>
+</div>"""
+
+
 @app.route('/')
 def home():
     return "Hello, World!"  # return a string
@@ -20,11 +26,11 @@ def static_testing():
 def portfolio():
     details = portfolio_commands.get_portfolio_details(1)
     table_lines = _make_table_from_details(details)
-    summary = _make_summary_from_details(details)
+    cards_lines = _make_cards_summary_from_details(details)
     return render_template(
         'portfolio.html',
         table_lines=table_lines,
-        summary=summary
+        cards_lines=cards_lines
     )
 
 
@@ -65,7 +71,7 @@ def _make_td_html(td_data, field):
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
-def _make_summary_from_details(details):
+def _make_cards_summary_from_details(details):
     summary = defaultdict(float)
     for detail in details:
         summary['gain1dp'] += detail.gain1dp * detail.portfoliop / 100
@@ -78,7 +84,10 @@ def _make_summary_from_details(details):
             summary[k] = '{0:.2f}%'.format(summary[k])
         elif 'gain' in k or k == 'value':
             summary[k] = '${0:.2f}'.format(summary[k])
-    return summary
+    cards = []
+    for k, v in summary.items():
+        cards.append(card_template.format(key=k, value=v))
+    return cards
 
 
 if __name__ == '__main__':

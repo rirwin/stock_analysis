@@ -4,19 +4,26 @@
     <title>Portfolio Performance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='semantic.min.css') }}">
+    <!--<link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='custom.css') }}">-->
   </head>
 <body>
-    <div class="ui container">
-      <h2>Portfolio</h2>
-    </div>
+<br>
 <div class="ui container">
-  <h3>Details</h3>
+<div class="ui cards">
+{% for card in cards_lines %}
+{{ card|safe }}
+{% endfor %}
+</div>
+</div>
+<br>
+<div class="ui container">
 {% for line in table_lines %}
 {{ line|safe }}
 {% endfor %}
 </div>
 <script src="../static/jquery.min.js"></script>
 <script src="../static/stupidtable.min.js"></script>
+<!--<script src="../static/semantic.min.js"></script>-->
 <script>
 $(document).ready(function(){
     $('table').stupidtable({
