@@ -190,3 +190,30 @@ class TestPriceHistoryLogic(object):
         dates = logic.get_dates_last_two_sessions()
 
         assert dates == (price2.date, price1.date)
+
+    @db.in_sandbox
+    def test_get_benchmark_history_dates(self):
+        logic = PriceHistoryLogic()
+
+        start_date = datetime.date(2017, 1, 1)
+        dates = [
+            start_date + datetime.timedelta(days=x) for x in range(100)
+            if (start_date + datetime.timedelta(days=x)).isoweekday() <= 5
+        ]
+        # holidays
+        dates.remove(datetime.date(2017, 1, 2))
+        dates.remove(datetime.date(2017, 1, 16))
+        dates.remove(datetime.date(2017, 2, 20))
+
+        prices = [TickerDatePrice(ticker='AAPL', date=d, price=145.0) for d in dates]
+        logic.add_prices(prices)
+
+        actuals = logic.get_benchmark_history_dates()
+        assert actuals == [
+            datetime.date(2017, 4, 10),  # curr day
+            datetime.date(2017, 4, 7),   # prev day
+            datetime.date(2017, 4, 3),   # 7d
+            datetime.date(2017, 3, 10),  # 30d
+            datetime.date(2017, 1, 10),  # 90d
+            None,  # data doesn't go back that far
+        ]

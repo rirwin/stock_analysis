@@ -107,5 +107,23 @@ class PriceHistoryLogic(object):
         the_day_before = self._make_date_from_isoformatted_string(results[1][0])
         return (last_session_date, the_day_before)
 
+    def get_benchmark_history_dates(self):
+        session = Session()
+        results = session.query(PriceHistory.date)\
+            .group_by(PriceHistory.date)\
+            .order_by(desc(PriceHistory.date))\
+            .limit(260)\
+            .all()  # 52 weeks * 5 = 260
+        session.close()
+
+        all_dates = [self._make_date_from_isoformatted_string(result[0]) for result in results]
+
+        return [self._get_date_match_in_data(all_dates[0], days_back, all_dates) for days_back in (0, 1, 7, 30, 90, 365)]
+
+    def _get_date_match_in_data(self, most_recent_date, days_back_target, all_dates):
+        for days_back in range(3):  # Never more than a 3 day break
+            if most_recent_date - datetime.timedelta(days=days_back_target) - datetime.timedelta(days_back) in all_dates:
+                return most_recent_date - datetime.timedelta(days=days_back_target) - datetime.timedelta(days_back)
+
     def _make_date_from_isoformatted_string(self, date_str):
         return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
