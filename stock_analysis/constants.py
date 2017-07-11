@@ -21,4 +21,8 @@ for s in nasdaq_tickers:
 for s in nyse_tickers:
     ticker_name_to_exchange[s] = 'NYSE'
 
-BENCHMARK_TICKERS = ['SPY', 'QQQ', 'DIA']
+
+BENCHMARK_TICKERS = ['.INX', '.DJI', '.IXIC']
+ticker_name_to_exchange['.INX'] = 'INDEXSP'
+ticker_name_to_exchange['.DJI'] = 'INDEXDJX'
+ticker_name_to_exchange['.IXIC'] = 'INDEXNASDAQ'
