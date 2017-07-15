@@ -56,8 +56,8 @@ class PriceHistoryLogic(object):
         return price_info
 
     def get_ticker_dates_prices(self, ticker_dates):
-        tickers = [td.ticker for td in ticker_dates]
-        dates = [td.date for td in ticker_dates]
+        tickers = set([td.ticker for td in ticker_dates])
+        dates = set([td.date for td in ticker_dates])
         session = Session()
         results = session.query(PriceHistory.ticker, PriceHistory.date, PriceHistory.price)\
             .filter(PriceHistory.ticker.in_(tickers))\
