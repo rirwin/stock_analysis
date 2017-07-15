@@ -56,23 +56,23 @@ class PriceHistoryLogic(object):
         return price_info
 
     def get_ticker_dates_prices(self, ticker_dates):
+        tickers = [td.ticker for td in ticker_dates]
+        dates = [td.date for td in ticker_dates]
         session = Session()
-        ticker_date_prices = []
-        # TODO consider batching queries
-        for ticker_date in ticker_dates:
-            result = session.query(PriceHistory.price)\
-                .filter_by(ticker=ticker_date.ticker)\
-                .filter_by(date=ticker_date.date)\
-                .first()
-            if result:
-                ticker_date_prices.append(
-                    TickerDatePrice(
-                        ticker=ticker_date.ticker,
-                        date=ticker_date.date,
-                        price=float(result[0])
-                    )
-                )
+        results = session.query(PriceHistory.ticker, PriceHistory.date, PriceHistory.price)\
+            .filter(PriceHistory.ticker.in_(tickers))\
+            .filter(PriceHistory.date.in_(dates))\
+            .all()
         session.close()
+        ticker_date_prices = [
+            TickerDatePrice(
+                ticker=result[0],
+                date=self._make_date_from_isoformatted_string(result[1]),
+                price=float(result[2])
+            )
+            for result in results
+            if result
+        ]
         return ticker_date_prices
 
     def get_tickers_gains(self, tickers, date_range):
