@@ -64,13 +64,14 @@ class PriceHistoryLogic(object):
                 .filter_by(ticker=ticker_date.ticker)\
                 .filter_by(date=ticker_date.date)\
                 .first()
-            ticker_date_prices.append(
-                TickerDatePrice(
-                    ticker=ticker_date.ticker,
-                    date=ticker_date.date,
-                    price=float(result[0])
+            if result:
+                ticker_date_prices.append(
+                    TickerDatePrice(
+                        ticker=ticker_date.ticker,
+                        date=ticker_date.date,
+                        price=float(result[0])
+                    )
                 )
-            )
         session.close()
         return ticker_date_prices
 
