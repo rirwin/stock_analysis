@@ -44,8 +44,6 @@ class PortfolioCommands(object):
                 value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
             )
             for ticker in tickers
-            # TODO - 2 things - figure out problem with IJR and handle general case better
-            if ticker != 'IJR'
         ]
 
     def get_benchmark_comparison_to_order_prices(self, user_id):
