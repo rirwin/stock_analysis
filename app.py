@@ -2,6 +2,7 @@ from collections import defaultdict
 from flask import Flask, render_template
 import locale
 from stock_analysis.commands import portfolio
+from stock_analysis import constants
 
 
 locale.setlocale(locale.LC_ALL, '')
@@ -27,9 +28,10 @@ def static_testing():
 
 @app.route('/portfolio')
 def portfolio():
-    details = portfolio_commands.get_portfolio_details(1)
-    table_lines = _make_table_from_details(details)
-    cards_lines = _make_cards_summary_from_details(details)
+    basic_details = portfolio_commands.get_portfolio_details(1)
+    order_comps = portfolio_commands.get_benchmark_comparison_to_order_prices(1)
+    table_lines = _make_table_from_details(basic_details)
+    cards_lines = _make_cards_summary(basic_details, order_comps)
     return render_template(
         'portfolio.html',
         table_lines=table_lines,
@@ -74,7 +76,7 @@ def _make_td_html(td_data, field):
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
-def _make_cards_summary_from_details(details):
+def _make_cards_summary(details, order_comps):
     summary = defaultdict(float)
     for detail in details:
         summary['gain1dp'] += detail.gain1dp * detail.portfoliop / 100
@@ -90,6 +92,15 @@ def _make_cards_summary_from_details(details):
     cards = []
     for card_title in ['value', 'gainp', 'gainv', 'gain1dp', 'gain1dv']:
         cards.append(card_template.format(key=card_title, value=summary[card_title]))
+
+    comps = defaultdict(float)
+    for ticker, orders in order_comps.items():
+        for bench_ticker in constants.BENCHMARK_TICKERS:
+            comps[bench_ticker] += sum(o[1][bench_ticker] * o[2] for o in orders)
+
+    for bench_ticker, vs_percent in comps.items():
+       value = '{0:.2f}%'.format(vs_percent)
+       cards.append(card_template.format(key='vs. ' + bench_ticker, value=value))
 
     return cards
 

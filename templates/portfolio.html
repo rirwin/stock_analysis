@@ -28,8 +28,8 @@
 $(document).ready(function(){
     $('table').stupidtable({
         "customfloat":function(a,b){
-            a = a.replace(/[$%]/g, '')
-            b = b.replace(/[$%]/g, '')
+            a = a.replace(/[$%,]/g, '')
+            b = b.replace(/[$%,]/g, '')
             return parseFloat(a, 10) - parseFloat(b ,10);
         }
     })
