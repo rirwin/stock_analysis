@@ -52,7 +52,6 @@ class PortfolioCommands(object):
         orders = self.order_logic.get_orders_for_user(user_id)
         tickers = set([o.ticker for o in orders if o.order_type == order_history.BUY_ORDER_TYPE])
         tickers = list(tickers)
-        order_tickers = list(tickers)
         tickers.extend(constants.BENCHMARK_TICKERS)
         dates = set([o.date for o in orders if o.order_type == order_history.BUY_ORDER_TYPE])
         historical_dates = self.price_logic.get_benchmark_history_dates()
@@ -106,7 +105,8 @@ class PortfolioCommands(object):
                     historical_benchmark_price = ticker_date_price_map[benchmark_ticker].get(date)
                     historical_ticker_price = ticker_date_price_map[ticker].get(date)
                     if historical_benchmark_price is not None and historical_ticker_price is not None:
-                        benchmark_gain = 100 * (curr_benchmark_price - historical_benchmark_price) / historical_benchmark_price
+                        benchmark_gain = 100 * (curr_benchmark_price - historical_benchmark_price) / \
+                            historical_benchmark_price
                         ticker_gain = 100 * (curr_ticker_price - historical_ticker_price) / historical_ticker_price
                         fixed_date_comps[ticker][benchmark_ticker][label] = ticker_gain - benchmark_gain
                     else:

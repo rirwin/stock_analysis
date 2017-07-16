@@ -69,7 +69,8 @@ def _make_td_html(td_data, field):
     else:
         td_tag = '<td style="text-align:right;">'
 
-    td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent else '$' + locale.format('%.2f', td_data, grouping=True)
+    td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent \
+        else '$' + locale.format('%.2f', td_data, grouping=True)
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 

@@ -113,8 +113,6 @@ class TestPortfolioCommands(object):
         # benchmark ticker 0 stays flat, 1 goes down 1 per day, 2 goes up 2 per day
         benchmark_diffs = {k: v for (k, v) in zip(constants.BENCHMARK_TICKERS, [0, -1, 2])}
         base_benchmark_price = 1000.0  # for all benchmarks
-        start_date = order1.date
-        stop_date = prices[-1].date
         benchmark_prices = []
         dates = [  # create the list manually - need to skip the weekend :S
             datetime.date(2017, 6, 8),
@@ -153,7 +151,7 @@ class TestPortfolioCommands(object):
             for k in constants.BENCHMARK_TICKERS
         }
         atvi_comp_gains = {k: (atvi_gain - atvi_bench_gain[k]) for k in constants.BENCHMARK_TICKERS}
-        expected_order_comps['AAPL'].append((order1, aapl_comp_gains , order1.price / (order1.price + order2.price)))
+        expected_order_comps['AAPL'].append((order1, aapl_comp_gains, order1.price / (order1.price + order2.price)))
         expected_order_comps['ATVI'].append((order2, atvi_comp_gains, order2.price / (order1.price + order2.price)))
 
         order_comps = cmds.get_benchmark_comparison_to_order_prices(self.user_id)
@@ -202,8 +200,6 @@ class TestPortfolioCommands(object):
         # benchmark ticker 0 stays flat, 1 goes down 1 per day, 2 goes up 2 per day
         benchmark_diffs = {k: v for (k, v) in zip(constants.BENCHMARK_TICKERS, [0, -1, 2])}
         base_benchmark_price = 1000.0  # for all benchmarks
-        start_date = order1.date
-        stop_date = prices[-1].date
         benchmark_prices = []
         dates = [  # create the list manually - need to skip the weekend :S
             datetime.date(2017, 6, 8),
@@ -256,7 +252,6 @@ class TestPortfolioCommands(object):
             expected_comp_gains['AAPL'][bench_ticker]['1dp'] = aapl_1d_gain - bench_1d_gains[bench_ticker]
             expected_comp_gains['AAPL'][bench_ticker]['7dp'] = aapl_7d_gain - bench_7d_gains[bench_ticker]
             expected_comp_gains['ATVI'][bench_ticker]['1dp'] = atvi_1d_gain - bench_1d_gains[bench_ticker]
-
 
         fixed_date_comps = cmds.get_benchmark_comparison_to_fixed_date_prices(self.user_id)
         for ticker in ['AAPL', 'ATVI']:

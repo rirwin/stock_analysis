@@ -119,12 +119,16 @@ class PriceHistoryLogic(object):
 
         all_dates = [self._make_date_from_isoformatted_string(result[0]) for result in results]
 
-        return [self._get_date_match_in_data(all_dates[0], days_back, all_dates) for days_back in (0, 1, 7, 30, 90, 365)]
+        return [
+            self._get_date_match_in_data(all_dates[0], days_back, all_dates)
+            for days_back in (0, 1, 7, 30, 90, 365)
+        ]
 
     def _get_date_match_in_data(self, most_recent_date, days_back_target, all_dates):
         for days_back in range(3):  # Never more than a 3 day break
-            if most_recent_date - datetime.timedelta(days=days_back_target) - datetime.timedelta(days_back) in all_dates:
-                return most_recent_date - datetime.timedelta(days=days_back_target) - datetime.timedelta(days_back)
+            candidate_date_time_delta = datetime.timedelta(days=days_back_target) + datetime.timedelta(days_back)
+            if most_recent_date - candidate_date_time_delta in all_dates:
+                return most_recent_date - candidate_date_time_delta
 
     def _make_date_from_isoformatted_string(self, date_str):
         return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
