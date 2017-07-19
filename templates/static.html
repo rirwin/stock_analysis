@@ -2,9 +2,70 @@
 <html>
 <head>
 <link rel="stylesheet" text="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css">
+<link rel="stylesheet" text="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css">
 </head>
 <body>
+<br>
 <div class="ui container">
+<div class="ui cards">
+<div class="ui card"  style="width:auto">
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:small">Market Value</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium" id="market_value">initial_sum</div>
+</div>
+<div class="ui card"  style="width:auto">
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:small">key2</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium">value2</div>
+</div>
+<div class="ui container">
+    <button onclick="myReset()">Reset</button>
+    <button onclick="myInvert()">Invert Selection</button>
+</div>
+<script>
+function myReset() {
+    var table_div = document.getElementById("main_table_div");
+    var rows = table_div.getElementsByTagName("tr");
+    var row_i;
+    for (row_i = 0; row_i < rows.length; row_i++)
+        rows[row_i].classList.remove('active');
+    recalculate();
+}
+function myInvert() {
+    var table_div = document.getElementById("main_table_div");
+    var rows = table_div.getElementsByTagName("tr");
+    var row_i;
+    for (row_i = 1; row_i < rows.length; row_i++)
+        rows[row_i].classList.toggle('active')
+
+    recalculate()    
+}
+function myActivate(obj) {
+    obj.classList.toggle('active')
+    recalculate()
+}
+function recalculate() {
+    var table_div = document.getElementById("main_table_div");
+    var rows = table_div.getElementsByTagName("tr");
+    var row_i;
+    var active_sum = 0;
+    var inactive_sum = 0;
+    for (row_i = 1; row_i < rows.length; row_i++) {
+        var x = rows[row_i].getElementsByClassName("my_value");
+        var count_row = parseFloat(x[0].innerHTML, 10); 
+        if ( rows[row_i].classList.contains('active') ) 
+            active_sum = active_sum + count_row;
+        else 
+            inactive_sum = inactive_sum + count_row;
+    }
+    if ( active_sum > 0.1 )
+        document.getElementById("market_value").innerHTML = active_sum
+    else
+        document.getElementById("market_value").innerHTML = inactive_sum
+}
+</script>
+</div>
+</div>
+<br>
+<div class="ui container" id="main_table_div">
 <table class="ui sortable celled table">
   <thead>
     <tr>
@@ -16,37 +77,37 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
+    <tr onclick=myActivate(this)>
       <td>AAPL</td>
-      <td>1038</td>
+      <td class="my_value">1038</td>
       <td data-sort-value=736338>01/09/2017</td>
       <td>0.1</td>
       <td>12.8</td>
     </tr>
-    <tr style="display:visible">
+    <tr onclick=myActivate(this)>
       <td>AAPL</td>
-      <td data-sort-value=1038>1014</td>
+      <td data-sort-value=1038 class="my_value">1014</td>
       <td data-sort-value=736338>01/09/2017</td>
       <td data-sort-value=0.1>0.1</td>
       <td data-sort-value=12.8>11.4</td>
     </tr>
-    <tr>
+    <tr onclick=myActivate(this)>
       <td>AAPL</td>
-      <td data-sort-value=1038>24</td>
+      <td data-sort-value=1038 class="my_value">24</td>
       <td data-sort-value=736338>06/01/2017</td>
       <td data-sort-value=0.1>0.1</td>
       <td data-sort-value=12.8>1.2</td>
     </tr>
-    <tr>
+    <tr onclick=myActivate(this)>
       <td>ADBE</td>
-      <td>234</td>
+      <td class="my_value">234</td>
       <td data-sort-value=736389>03/01/2017</td>
       <td>0.4</td>
       <td>-91.3</td>
     </tr>
-    <tr>
+    <tr onclick=myActivate(this)>
       <td>ACC</td>
-      <td>134</td>
+      <td class="my_value">134</td>
       <td data-sort-value=736390>03/02/2017</td>
       <td>0.5</td>
       <td>-71.3</td>
@@ -56,16 +117,12 @@
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js"></script>
+<script src="../static/stupidtable.min.js"></script>
 <script>
-(function(c){c.fn.stupidtable=function(b){return this.each(function(){var a=c(this);b=b||{};b=c.extend({},c.fn.stupidtable.default_sort_fns,b);a.data("sortFns",b);a.stupidtable_build();a.on("click.stupidtable","thead th",function(){c(this).stupidsort()});a.find("th[data-sort-onload=yes]").eq(0).stupidsort()})};c.fn.stupidtable_settings=function(b){return this.each(function(){var a=c(this),f=c.extend({},c.fn.stupidtable.default_settings,b);a.stupidtable.settings=f})};c.fn.stupidsort=function(b){var a=
-c(this),f=0,g=c.fn.stupidtable.dir,d=a.closest("table"),h=a.data("sort")||null;d.stupidtable.settings||(d.stupidtable.settings=c.extend({},c.fn.stupidtable.default_settings));if(null!==h){var k=d.data("sortFns")[h];a.parents("tr").find("th").slice(0,c(this).index()).each(function(){var a=c(this).attr("colspan")||1;f+=parseInt(a,10)});var e;1==arguments.length?e=b:(e=b||a.data("sort-default")||g.ASC,a.data("sort-dir")&&(e=a.data("sort-dir")===g.ASC?g.DESC:g.ASC));a.data("sort-dir",e);d.trigger("beforetablesort",
-{column:f,direction:e,$th:a});d.css("display");setTimeout(function(){d.stupidtable.settings.will_manually_build_table||d.stupidtable_build();var b=d.data("stupidsort_internaltable");b.sort(function(a,b){var c=k(a.columns[f],b.columns[f]);return 0===c?a.index-b.index:c});e!=g.ASC&&b.reverse();var l={column:c.map(b,function(a,b){return[[a.columns[f],a.$tr,b]]}),sort_dir:e,$th:a,th_index:f,$table:d,datatype:h,compare_fn:k};d.stupidtable.settings.should_redraw(l)&&(trs=c.map(b,function(a){return a.$tr}),
-d.children("tbody").append(trs),d.find("th").data("sort-dir",null).removeClass("sorting-desc sorting-asc"),a.data("sort-dir",e).addClass("sorting-"+e),d.trigger("aftertablesort",{column:f,direction:e,$th:a}),d.css("display"))},10);return a}};c.fn.updateSortVal=function(b){var a=c(this);a.is("[data-sort-value]")&&a.attr("data-sort-value",b);a.data("sort-value",b);return a};c.fn.stupidtable.default_settings={should_redraw:function(b){return!0},will_manually_build_table:!1};c.fn.stupidtable.dir={ASC:"asc",
-DESC:"desc"};c.fn.stupidtable.default_sort_fns={"int":function(b,a){return parseInt(b,10)-parseInt(a,10)},"float":function(b,a){return parseFloat(b)-parseFloat(a)},string:function(b,a){return b.toString().localeCompare(a.toString())},"string-ins":function(b,a){b=b.toString().toLocaleLowerCase();a=a.toString().toLocaleLowerCase();return b.localeCompare(a)}};c.fn.stupidtable_build=function(){return this.each(function(){var b=c(this),a=[];b.children("tbody").children("tr").each(function(b,g){var d={$tr:c(g),
-columns:[],index:b};c(g).children("td").each(function(a,b){var e=c(b).data("sort-value");"undefined"===typeof e&&(e=c(b).text(),c(b).data("sort-value",e));d.columns.push(e)});a.push(d)});b.data("stupidsort_internaltable",a)})}})(jQuery);
 
 $(document).ready(function(){
-    $('table').stupidtable()
+    $('table').stupidtable();
+    myReset();
 });
 </script>
 </body>
