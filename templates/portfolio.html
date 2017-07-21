@@ -4,7 +4,6 @@
     <title>Portfolio Performance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='semantic.min.css') }}">
-    <!--<link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='custom.css') }}">-->
   </head>
 <body>
 <br>
@@ -13,17 +12,24 @@
 {% for card in cards_lines %}
 {{ card|safe }}
 {% endfor %}
+<div class="ui container">
+    <button onclick="reset_rows()">Reset</button>
+    <button onclick="invert_selection()">Invert Selection</button>
+</div>
 </div>
 </div>
 <br>
-<div class="ui container">
+<div class="ui container" id="main_table_div">
 {% for line in table_lines %}
 {{ line|safe }}
 {% endfor %}
 </div>
 <script src="../static/jquery.min.js"></script>
 <script src="../static/stupidtable.min.js"></script>
-<!--<script src="../static/semantic.min.js"></script>-->
+<script src="../static/card_updates.js"></script>
+<script>
+var stock_to_weight = {{ stock_to_weight|tojson }}
+</script>
 <script>
 $(document).ready(function(){
     $('table').stupidtable({
@@ -33,6 +39,7 @@ $(document).ready(function(){
             return parseFloat(a, 10) - parseFloat(b ,10);
         }
     })
+    reset_rows();
 });
 </script>
 </body>

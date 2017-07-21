@@ -6,6 +6,7 @@ function reset_rows() {
         rows[row_i].classList.remove('active');
     calculate_cards();
 }
+
 function invert_selection() {
     var table_div = document.getElementById("main_table_div");
     var rows = table_div.getElementsByTagName("tr");
@@ -14,26 +15,84 @@ function invert_selection() {
         rows[row_i].classList.toggle('active')
     calculate_cards();
 }
+
 function highlight_row(obj) {
-    obj.classList.toggle('active')
-    calculate_cards()
+    obj.classList.toggle('active');
+    calculate_cards();
 }
+
 function calculate_cards() {
+    var detail_classes = ['value', 'gainp', 'gainv', 'gain1dp', 'gain1dv']
+    var weight_map = {};
+
+    if ( should_calculate_all_cells() )
+        weight_map = stock_to_weight;
+    else
+        weight_map = calculate_weights();
+
+    for ( var class_i = 0; class_i < detail_classes.length; class_i++ ) {
+        var detail_class = detail_classes[class_i];
+        var card_value = calculate_card_value(detail_class, weight_map);
+        update_card_with_value(detail_class, card_value); 
+    }
+}
+
+function calculate_card_value(detail_class, ticker_to_weight){
     var table_div = document.getElementById("main_table_div");
     var rows = table_div.getElementsByTagName("tr");
-    var row_i;
-    var active_sum = 0;
-    var inactive_sum = 0;
-    for (row_i = 1; row_i < rows.length; row_i++) {
-        var x = rows[row_i].getElementsByClassName("num_shares");
-        var count_row = parseFloat(x[0].innerHTML, 10);
-        if ( rows[row_i].classList.contains('active') )
-            active_sum = active_sum + count_row;
-        else
-            inactive_sum = inactive_sum + count_row;
+    var total = 0;
+    for (var row_i = 1; row_i < rows.length; row_i++) {
+        var ticker = rows[row_i].cells[0].innerHTML;
+        if ( ticker in ticker_to_weight ) {
+            var td_value = parseFloat(rows[row_i].getElementsByClassName(detail_class)[0].innerHTML.replace(/[$%,]/g, ''), 10);
+            if ( detail_class.endsWith('p') )
+                td_value *= ticker_to_weight[ticker];
+            total += td_value;
+        }
     }
-    if ( active_sum > 0.1 )
-        document.getElementById("value_card").innerHTML = active_sum
+    return total;
+}
+
+function update_card_with_value(detail_class, card_value) {
+    var td_value = get_number_with_commas(parseFloat(card_value).toFixed(2));
+    if ( detail_class.endsWith('p') )
+        td_value = td_value + '%';
     else
-        document.getElementById("value_card").innerHTML = inactive_sum
+        td_value = '$' + td_value;
+    document.getElementById(detail_class + "_card").innerHTML = td_value;
+}
+
+function get_number_with_commas(x){
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function should_calculate_all_cells(){
+    var table_div = document.getElementById("main_table_div");
+    var rows = table_div.getElementsByTagName("tr");
+    active_cell_count = 0;
+    for (var row_i = 1; row_i < rows.length; row_i++) {
+        if ( rows[row_i].classList.contains('active') ) 
+            active_cell_count++;
+    }
+    if ( active_cell_count == rows.length - 1 ||  active_cell_count == 0)
+        return true;
+    return false;
+}
+
+function calculate_weights() {
+    var table_div = document.getElementById("main_table_div");
+    var dynamic_weights = {};
+    var denom = 0;
+    var rows = table_div.getElementsByTagName("tr");
+    for (var row_i = 1; row_i < rows.length; row_i++) {
+        if ( rows[row_i].classList.contains('active') ) {
+            var ticker = rows[row_i].cells[0].innerHTML;
+            denom = denom + stock_to_weight[ticker];
+            dynamic_weights[ticker] = stock_to_weight[ticker];
+        }
+    }
+    for (var key in dynamic_weights) {
+        dynamic_weights[key] /= denom;
+    }
+    return dynamic_weights;
 }

@@ -12,7 +12,7 @@ portfolio_commands = portfolio.PortfolioCommands()
 
 card_template = """<div class="ui card"  style="width:auto">
   <div class="content" style="padding:5px 5px 5px 5px;font-size:small">{key}</div>
-  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium">{value}</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium" id={key}_card>{value}</div>
 </div>"""
 
 
@@ -35,7 +35,8 @@ def portfolio():
     return render_template(
         'portfolio.html',
         table_lines=table_lines,
-        cards_lines=cards_lines
+        cards_lines=cards_lines,
+        stock_to_weight={k: sum(o[2] for o in v) for k, v in order_comps.items()},
     )
 
 
@@ -49,7 +50,7 @@ def _make_table_from_details(details):
     table_lines.append('</thead>')
     table_lines.append('<tbody>')
     for detail in details:
-        table_lines.append('<tr>')
+        table_lines.append('<tr onclick=highlight_row(this)>')
         table_lines.append('<td>{}</td>'.format(detail[0]))
         for field in fields[1:]:
             td_data = detail.__getattribute__(field)
@@ -67,9 +68,9 @@ def _make_td_html(td_data, field):
     if is_highlighted:
         tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 \
             else 'style="color:red;text-align:right;"'
-        td_tag = '<td {}>'.format(tag_coloring)
+        td_tag = '<td class="{}" {}>'.format(field, tag_coloring)
     else:
-        td_tag = '<td style="text-align:right;">'
+        td_tag = '<td class="{}" style="text-align:right;">'.format(field)
 
     td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent \
         else '$' + locale.format('%.2f', td_data, grouping=True)
