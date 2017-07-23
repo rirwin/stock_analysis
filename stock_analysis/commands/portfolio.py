@@ -9,8 +9,24 @@ PortfolioStockDetails = namedtuple(
     'PortfolioStockDetails',
     ['ticker', 'price', 'gain1dp', 'gain1dv', 'gainp', 'gainv', 'portfoliop', 'value']
 )
-
-# Get 1d for comparisons (then 1wk, 1mo, 3mo, 1yr)
+PortfolioOrderDetails = namedtuple(
+    'PortfolioOrderDetails',
+    [
+        'ticker',
+        'date',
+        'price',
+        'gain1dp',
+        'gain1dv',
+        'gainp',
+        'gainv',
+        'gainspyp',
+        'gainqqqp',
+        'gainspy1dp',
+        'gainqqq1dp',
+        'portfoliop',
+        'value',
+    ]
+)
 
 
 class PortfolioCommands(object):
@@ -46,6 +62,49 @@ class PortfolioCommands(object):
             for ticker in tickers
         ]
 
+    # TODO rename and remove above function
+    def get_portfolio_order_details(self, user_id):
+        order_purchase_comps = self.get_benchmark_comparison_to_order_prices(user_id)
+        order_fixed_comps = self.get_benchmark_comparison_to_fixed_date_prices(user_id)
+
+        (end_date, start_date) = self.price_logic.get_dates_last_two_sessions()
+        ticker_to_num_shares = self.order_logic.get_portfolio_shares_owned_on_date(user_id, end_date)
+        tickers = sorted(ticker_to_num_shares.keys())
+
+        dates = [start_date, end_date]
+        price_info = self.price_logic.get_ticker_price_history_map(tickers, dates)
+        purchase_value, _ = self.order_logic.get_ticker_total_purchased_sold(user_id)
+
+        port_value = sum(price_info[ticker][end_date] * ticker_to_num_shares[ticker] for ticker in tickers)
+        details = []
+        for ticker in tickers:
+            first_date = order_purchase_comps[ticker][0][0].date
+            gain_scale = sum(order[2] for order in order_purchase_comps[ticker])
+            gainspyp = sum(order[1]['SPY'] * order[2] for order in order_purchase_comps[ticker]) / gain_scale
+            gainqqqp = sum(order[1]['QQQ'] * order[2] for order in order_purchase_comps[ticker]) / gain_scale
+            gainspy1dp = order_fixed_comps[ticker]['SPY']['1dp']
+            gainqqq1dp = order_fixed_comps[ticker]['QQQ']['1dp']
+            details.append(
+                PortfolioOrderDetails(
+                    ticker=ticker,
+                    date=first_date,
+                    price=price_info[ticker][end_date],
+                    gain1dp=100 * (price_info[ticker][end_date] - price_info[ticker][start_date]) /
+                        price_info[ticker][start_date],
+                    gain1dv=ticker_to_num_shares[ticker] * (price_info[ticker][end_date] - price_info[ticker][start_date]),
+                    gainp=100 * (price_info[ticker][end_date] * ticker_to_num_shares[ticker] -
+                        purchase_value[ticker]) / purchase_value[ticker],
+                    gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] - purchase_value[ticker],
+                    gainspyp=gainspyp,
+                    gainqqqp=gainqqqp,
+                    gainspy1dp=gainspy1dp,
+                    gainqqq1dp=gainqqq1dp,
+                    portfoliop=100 * (ticker_to_num_shares[ticker] * price_info[ticker][end_date]) / port_value,
+                    value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
+                )
+            )
+        return details
+
     def get_benchmark_comparison_to_order_prices(self, user_id):
         """Each purchase order should be compared against what would've happened if a benchmark was bought instead"""
         # get every order (assume only buys for now - think about how to handle sold)
@@ -61,11 +120,11 @@ class PortfolioCommands(object):
         curr_date = historical_dates[0]
 
         # compute the purchase date vs a decision not to purchase {each bench ticker}
-        total_assets_purchased = sum(o.price for o in orders if o.order_type == order_history.BUY_ORDER_TYPE)
+        total_assets_purchased = sum(o.price * o.num_shares for o in orders if o.order_type == order_history.BUY_ORDER_TYPE)
         order_comps = defaultdict(list)  # {ticker: [(order, gain, weight)]
         for order in orders:
             order_gain = 100 * (ticker_date_price_map[order.ticker][curr_date] - order.price) / order.price
-            weight = order.price / total_assets_purchased
+            weight = order.num_shares * order.price / total_assets_purchased
             gain_info = {}
             for comp_ticker in constants.BENCHMARK_TICKERS:
                 comp_curr_price = ticker_date_price_map[comp_ticker][curr_date]

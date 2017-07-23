@@ -2,6 +2,7 @@ from collections import defaultdict
 import datetime
 from stock_analysis.commands import portfolio
 from stock_analysis.commands.portfolio import PortfolioStockDetails
+from stock_analysis.commands.portfolio import PortfolioOrderDetails
 from stock_analysis import constants
 from stock_analysis.logic import order_history
 from stock_analysis.logic.order_history import Order
@@ -78,6 +79,101 @@ class TestPortfolioCommands(object):
         assert details == expected
 
     @db.in_sandbox
+    def test_get_portfolio_order_details(self):
+        cmds = portfolio.PortfolioCommands()
+        order1 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='AAPL',
+            date=datetime.date(2017, 6, 12),
+            num_shares=2,
+            price=150.0,
+        )
+        order2 = Order(
+            user_id=self.user_id,
+            order_type=order_history.BUY_ORDER_TYPE,
+            ticker='ATVI',
+            date=datetime.date(2017, 6, 13),
+            num_shares=3,
+            price=170.0,
+        )
+
+        prices1 = [
+            TickerDatePrice('AAPL', datetime.date(2017, 6, 12), 149.0),
+            TickerDatePrice('AAPL', datetime.date(2017, 6, 13), 151.0),
+            TickerDatePrice('AAPL', datetime.date(2017, 6, 14), 153.0),
+            TickerDatePrice('AAPL', datetime.date(2017, 6, 15), 153.0),
+        ]
+        prices2 = [
+            TickerDatePrice('ATVI', datetime.date(2017, 6, 13), 170.0),
+            TickerDatePrice('ATVI', datetime.date(2017, 6, 14), 171.0),
+            TickerDatePrice('ATVI', datetime.date(2017, 6, 15), 172.0),
+        ]
+        self.order_logic.add_orders([order1, order2])
+        self.price_logic.add_prices(prices1)
+        self.price_logic.add_prices(prices2)
+
+        benchmark_diffs = {k: v for (k, v) in zip(['SPY', 'QQQ', 'DIA'], [10, -10, 0])}
+        base_benchmark_price = 1000.0  # for all benchmarks
+        benchmark_prices = []
+        dates = [p.date for p in prices1]
+        for ticker in ['SPY', 'QQQ', 'DIA']:
+            days = 0
+            for idx, date in enumerate(dates):
+                benchmark_prices.append(
+                    TickerDatePrice(
+                        ticker,
+                        date,
+                        base_benchmark_price + benchmark_diffs[ticker] * idx
+                    )
+                )
+                days += 1
+        self.price_logic.add_prices(benchmark_prices)
+
+        details = cmds.get_portfolio_order_details(self.user_id)
+        port_value = order1.num_shares * prices1[-1].price + order2.num_shares * prices2[-1].price
+        expected = [
+            PortfolioOrderDetails(
+                ticker=order1.ticker,
+                date=order1.date,  # TODO add another order with this ticker
+                price=prices1[-1].price,
+                gain1dp=100 * (prices1[-1].price - prices1[-2].price) / prices1[-2].price,
+                gain1dv=order1.num_shares * (prices1[-1].price - prices1[-2].price),
+                gainp=100 * (prices1[-1].price - order1.price) / order1.price,
+                gainv=order1.num_shares * (prices1[-1].price - order1.price),
+                gainspyp=-1.0,  # TODO derive these
+                gainqqqp=5.0,
+                gainspy1dp=-0.980,
+                gainqqq1dp=1.020,
+                portfoliop=100 * (order1.num_shares * prices1[-1].price) / port_value,
+                value=order1.num_shares * prices1[-1].price,
+            ),
+            PortfolioOrderDetails(
+                ticker=order2.ticker,
+                date=order2.date,
+                price=prices2[-1].price,
+                gain1dp=100 * (prices2[-1].price - prices2[-2].price) / prices2[-2].price,
+                gain1dv=order2.num_shares * (prices2[-1].price - prices2[-2].price),
+                gainp=100 * (prices2[-1].price - order2.price) / order2.price,
+                gainv=order2.num_shares * (prices2[-1].price - order2.price),
+                gainspyp=-0.804,  # TODO derive these
+                gainqqqp=3.1967,
+                gainspy1dp=-0.3956,
+                gainqqq1dp=1.6052,
+                portfoliop=100 * (order2.num_shares * prices2[-1].price) / port_value,
+                value=order2.num_shares * prices2[-1].price,
+            ),
+        ]
+        for actual, expected in zip(details, expected):
+            for field in actual._fields:
+                actual_data = actual.__getattribute__(field)
+                expected_data = expected.__getattribute__(field)
+                if field in ('ticker', 'date', 'price', 'value'):
+                    assert actual_data == expected_data
+                else:
+                    assert _nearly_equal(actual_data, expected_data)
+
+    @db.in_sandbox
     def test_get_benchmark_comparison_to_order_prices(self):
         cmds = portfolio.PortfolioCommands()
         order1 = Order(
@@ -151,8 +247,11 @@ class TestPortfolioCommands(object):
             for k in constants.BENCHMARK_TICKERS
         }
         atvi_comp_gains = {k: (atvi_gain - atvi_bench_gain[k]) for k in constants.BENCHMARK_TICKERS}
-        expected_order_comps['AAPL'].append((order1, aapl_comp_gains, order1.price / (order1.price + order2.price)))
-        expected_order_comps['ATVI'].append((order2, atvi_comp_gains, order2.price / (order1.price + order2.price)))
+        total_purchased_value = order1.price * order1.num_shares + order2.price * order2.num_shares
+        aapl_weight = order1.price * order1.num_shares / total_purchased_value
+        atvi_weight = order2.price * order2.num_shares / total_purchased_value
+        expected_order_comps['AAPL'].append((order1, aapl_comp_gains, aapl_weight))
+        expected_order_comps['ATVI'].append((order2, atvi_comp_gains, atvi_weight))
 
         order_comps = cmds.get_benchmark_comparison_to_order_prices(self.user_id)
 
