@@ -16,9 +16,18 @@ card_template = """<div class="ui card"  style="width:auto">
 </div>"""
 
 
-@app.route('/')
-def home():
-    return "Hello, World!"  # return a string
+@app.route('/portfolio_orders')
+def portfolio_orders():
+    details = portfolio_commands.get_portfolio_order_details(1)
+    order_comps = portfolio_commands.get_benchmark_comparison_to_order_prices(1)
+    table_lines = _make_table_from_details(details)
+    cards_lines = _make_cards_html()
+    return render_template(
+        'portfolio.html',
+        table_lines=table_lines,
+        cards_lines=cards_lines,
+        stock_to_weight={k: sum(o[2] for o in v) for k, v in order_comps.items()},
+    )
 
 
 @app.route('/static')
@@ -46,11 +55,14 @@ def _make_table_from_details(details):
     table_lines.append('<thead>')
     table_lines.append('<th data-sort="string">{}</th>'.format(fields[0]))
     for field in fields[1:]:
-        table_lines.append('<th data-sort="customfloat">{}</th>'.format(field))
+        if field == 'date':
+            table_lines.append('<th data-sort="int">{}</th>'.format(field))
+        else:
+            table_lines.append('<th data-sort="customfloat">{}</th>'.format(field))
     table_lines.append('</thead>')
     table_lines.append('<tbody>')
     for detail in details:
-        table_lines.append('<tr onclick=highlight_row(this)>')
+        table_lines.append('<tr onclick=highlight_row(event)>')
         table_lines.append('<td>{}</td>'.format(detail[0]))
         for field in fields[1:]:
             td_data = detail.__getattribute__(field)
@@ -62,6 +74,7 @@ def _make_table_from_details(details):
 
 
 def _make_td_html(td_data, field):
+    # TODO change class="{}" to data type or something better
     is_percent = field.endswith('p')
     is_highlighted = 'gain' in field
 
@@ -69,30 +82,29 @@ def _make_td_html(td_data, field):
         tag_coloring = 'style="color:green;text-align:right;"' if td_data >= 0 \
             else 'style="color:red;text-align:right;"'
         td_tag = '<td class="{}" {}>'.format(field, tag_coloring)
+    elif field == 'date':
+        td_tag = '<td data-sort-value={} class="{}" style="text-align:right;">'.format(td_data.toordinal(), field)
     else:
         td_tag = '<td class="{}" style="text-align:right;">'.format(field)
 
-    td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent \
-        else '$' + locale.format('%.2f', td_data, grouping=True)
+    if field == 'date':
+        td_data_formatted = td_data.isoformat()
+    else:
+        td_data_formatted = '{0:.2f}%'.format(td_data) if is_percent \
+            else '$' + locale.format('%.2f', td_data, grouping=True)
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
+def _make_cards_html():
+    cards = []
+    for card_title in ['value', 'gain1dp', 'gain1dv', 'gainp', 'gainv', 'gainspyp', 'gainqqqp', 'gainspy1dp', 'gainqqq1dp']:
+        cards.append(card_template.format(key=card_title, value='-'))
+    return cards
+
 def _make_cards_summary(details, order_comps):
-    summary = defaultdict(float)
-    for detail in details:
-        summary['gain1dp'] += detail.gain1dp * detail.portfoliop / 100
-        summary['gainp'] += detail.gainp * detail.portfoliop / 100
-        summary['gain1dv'] += detail.gain1dv
-        summary['gainv'] += detail.gainv
-        summary['value'] += detail.value
-    for k in summary.keys():
-        if k.endswith('p'):
-            summary[k] = '{0:.2f}%'.format(summary[k])
-        elif 'gain' in k or k == 'value':
-            summary[k] = '$' + locale.format('%.2f', summary[k], grouping=True)
     cards = []
     for card_title in ['value', 'gainp', 'gainv', 'gain1dp', 'gain1dv']:
-        cards.append(card_template.format(key=card_title, value=summary[card_title]))
+        cards.append(card_template.format(key=card_title, value='-'))
 
     comps = defaultdict(float)
     for ticker, orders in order_comps.items():

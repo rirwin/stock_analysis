@@ -16,13 +16,35 @@ function invert_selection() {
     calculate_cards();
 }
 
-function highlight_row(obj) {
-    obj.classList.toggle('active');
+function highlight_row(ev) {
+    var wasActiveRow = ev.target.parentElement.classList.contains('active');
+    ev.target.parentElement.classList.toggle('active');
+    
+    // if clicked row was highlighted and shift key pressed
+    // highlight all consecutive unhighlighted rows above
+    if ( !wasActiveRow && ev.shiftKey){
+        var table_div = document.getElementById("main_table_div");
+        var rows = table_div.getElementsByTagName("tr");
+        var this_row_i;
+        var row_i;
+        for (row_i = 0; row_i < rows.length; row_i++)
+            if (rows[row_i] == ev.target.parentElement)
+                this_row_i = row_i;
+
+        row_i = this_row_i - 1;
+        while (row_i > 0 && !rows[row_i].classList.contains('active')) {
+            rows[row_i].classList.toggle('active');
+            row_i--;
+        }
+    } 
     calculate_cards();
 }
 
 function calculate_cards() {
-    var detail_classes = ['value', 'gainp', 'gainv', 'gain1dp', 'gain1dv']
+    var detail_classes = [
+        'value', 'gainp', 'gainv', 'gain1dp', 'gain1dv', 'gainspyp',
+        'gainqqqp', 'gainspy1dp', 'gainqqq1dp'
+    ]
     var weight_map = {};
 
     if ( should_calculate_all_cells() )
