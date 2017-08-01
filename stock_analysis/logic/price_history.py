@@ -56,22 +56,23 @@ class PriceHistoryLogic(object):
         return price_info
 
     def get_ticker_dates_prices(self, ticker_dates):
+        tickers = set([td.ticker for td in ticker_dates])
+        dates = set([td.date for td in ticker_dates])
         session = Session()
-        ticker_date_prices = []
-        # TODO consider batching queries
-        for ticker_date in ticker_dates:
-            result = session.query(PriceHistory.price)\
-                .filter_by(ticker=ticker_date.ticker)\
-                .filter_by(date=ticker_date.date)\
-                .first()
-            ticker_date_prices.append(
-                TickerDatePrice(
-                    ticker=ticker_date.ticker,
-                    date=ticker_date.date,
-                    price=float(result[0])
-                )
-            )
+        results = session.query(PriceHistory.ticker, PriceHistory.date, PriceHistory.price)\
+            .filter(PriceHistory.ticker.in_(tickers))\
+            .filter(PriceHistory.date.in_(dates))\
+            .all()
         session.close()
+        ticker_date_prices = [
+            TickerDatePrice(
+                ticker=result[0],
+                date=self._make_date_from_isoformatted_string(result[1]),
+                price=float(result[2])
+            )
+            for result in results
+            if result
+        ]
         return ticker_date_prices
 
     def get_tickers_gains(self, tickers, date_range):
@@ -106,6 +107,28 @@ class PriceHistoryLogic(object):
         last_session_date = self._make_date_from_isoformatted_string(results[0][0])
         the_day_before = self._make_date_from_isoformatted_string(results[1][0])
         return (last_session_date, the_day_before)
+
+    def get_benchmark_history_dates(self):
+        session = Session()
+        results = session.query(PriceHistory.date)\
+            .group_by(PriceHistory.date)\
+            .order_by(desc(PriceHistory.date))\
+            .limit(260)\
+            .all()  # 52 weeks * 5 = 260
+        session.close()
+
+        all_dates = [self._make_date_from_isoformatted_string(result[0]) for result in results]
+
+        return [
+            self._get_date_match_in_data(all_dates[0], days_back, all_dates)
+            for days_back in (0, 1, 7, 30, 90, 365)
+        ]
+
+    def _get_date_match_in_data(self, most_recent_date, days_back_target, all_dates):
+        for days_back in range(3):  # Never more than a 3 day break
+            candidate_date_time_delta = datetime.timedelta(days=days_back_target) + datetime.timedelta(days_back)
+            if most_recent_date - candidate_date_time_delta in all_dates:
+                return most_recent_date - candidate_date_time_delta
 
     def _make_date_from_isoformatted_string(self, date_str):
         return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()

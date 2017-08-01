@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections import namedtuple
 import datetime
 from sqlalchemy import func
@@ -101,7 +102,28 @@ class OrderHistoryLogic(object):
             {'user_id': user_id, 'date': date.isoformat()},
         ).fetchall()
         session.close()
-        return [TickerShareCount(x[0], x[1]) for x in results]
+
+        return {x[0]: x[1] for x in results}
+
+    def get_ticker_to_orders(self, user_id):
+        order_info = defaultdict(list)
+        orders = self.get_orders_for_user(user_id)
+        for order in orders:
+            order_info[order.ticker].append(order)
+        return order_info
+
+    def get_ticker_total_purchased_sold(self, user_id):
+        ticker_to_orders = self.get_ticker_to_orders(user_id)
+        ticker_to_purchased_value = {}
+        ticker_to_sold_value = {}
+        for ticker, orders in ticker_to_orders.items():
+            ticker_to_purchased_value[ticker] = sum(
+                o.num_shares * o.price for o in orders if o.order_type == BUY_ORDER_TYPE
+            )
+            ticker_to_sold_value[ticker] = sum(
+                o.num_shares * o.price for o in orders if o.order_type == SELL_ORDER_TYPE
+            )
+        return ticker_to_purchased_value, ticker_to_sold_value
 
     # TODO move to logic helper
     def _make_date_from_isoformatted_string(self, date_str):

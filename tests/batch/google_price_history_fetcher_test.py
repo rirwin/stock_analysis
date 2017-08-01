@@ -6,6 +6,7 @@ from batch.google_price_history_fetcher import GooglePriceHistoryFetcher
 from batch.google_price_history_fetcher import DatePrice
 from stock_analysis.logic.order_history import TickerDate
 from stock_analysis.logic.price_history import TickerDatePrice
+from stock_analysis import constants
 
 
 class TestGooglePriceHistoryFetcher(object):
@@ -107,7 +108,9 @@ class TestGooglePriceHistoryFetcher(object):
         ) as patch_process:
 
             batch.run()
-            assert patch_process.call_args_list == [mock.call(ticker_date)]
+            benchmark_ticker_dates = [TickerDate(t, ticker_date.date) for t in constants.BENCHMARK_TICKERS]
+            assert patch_process.call_args_list == [mock.call(ticker_date)] + \
+                [mock.call(td) for td in benchmark_ticker_dates]
 
     def test_process_ticker_order_date(self):
         batch = GooglePriceHistoryFetcher()

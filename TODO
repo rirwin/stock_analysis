@@ -1,0 +1,8 @@
+expandable rows for multiple orders - 
+    Create rows (python) but make them invisible. 
+    Make the data-sort-value the master column.    
+
+    Steps:
+    - python more columns of just tickers incl. vs SPY, QQQ overall
+    - python all orders as rows + summed row incl. vs SPY, QQQ overall
+    - figure out how to collapse in html incl. arrow/button, sorting on summed row

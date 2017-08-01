@@ -9,8 +9,10 @@ from database.price_history import Base as PriceBase
 
 if os.environ.get('USE_TEST_DB') is not None:
     engine = create_engine('sqlite://')
+elif os.environ.get('USE_PROD_DB') is not None:
+    engine = create_engine('sqlite:///database/prod.stock_history.sqlite3db')
 else:
-    engine = create_engine('sqlite:///database/stock_history.sqlite3db')
+    engine = create_engine('sqlite:///database/dev.stock_history.sqlite3db')
 
 
 def create_all_tables():

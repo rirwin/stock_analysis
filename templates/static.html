@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='semantic.min.css') }}">
+</head>
+<body>
+<br>
+<div class="ui container">
+<div class="ui cards">
+<div class="ui card"  style="width:auto">
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:small">value</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium" id="value_card">0</div>
+</div>
+<div class="ui card"  style="width:auto">
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:small">gainp</div>
+  <div class="content" style="padding:5px 5px 5px 5px;font-size:medium" id=>value2</div>
+</div>
+<div class="ui container">
+    <button onclick="reset_rows()">Reset</button>
+    <button onclick="invert_selection()">Invert Selection</button>
+</div>
+</div>
+</div>
+<br>
+<div class="ui container" id="main_table_div">
+<table class="ui sortable celled table">
+  <thead>
+    <tr>
+      <th data-sort="string">Ticker</th>
+      <th data-sort="customfloat">Shares</th>
+      <th data-sort="int">Buy Date</th>
+      <th data-sort="customfloat">Value</th>
+      <th data-sort="customfloat">Inc. Perc.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr onclick=highlight_row(this)>
+      <td>AAPL</td>
+      <td class="num_shares">1038</td>
+      <td data-sort-value=736338>01/09/2017</td>
+      <td>$1000</td>
+      <td>12.8</td>
+    </tr>
+<!--<tr onclick=highlight_row(this)>
+      <td>AAPL</td>
+      <td data-sort-value=1038 class="num_shares">1014</td>
+      <td data-sort-value=736338>01/09/2017</td>
+      <td data-sort-value=1000>$900</td>
+      <td data-sort-value=12.8>11.4</td>
+    </tr>
+      <td data-sort-value=12.8>1.2</td>
+    </tr> -->
+    <tr onclick=highlight_row(this)>
+      <td>ADBE</td>
+      <td class="num_shares">234</td>
+      <td data-sort-value=736389>03/01/2017</td>
+      <td>$4000</td>
+      <td>-91.3</td>
+    </tr>
+    <tr onclick=highlight_row(this)>
+      <td>ACC</td>
+      <td class="num_shares">134</td>
+      <td data-sort-value=736390>03/02/2017</td>
+      <td>$3000</td>
+      <td>-71.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<script src="../static/jquery.min.js"></script>
+<script src="../static/stupidtable.min.js"></script>
+<script src="../static/card_updates.js"></script>
+<script>
+
+$(document).ready(function(){
+    $('table').stupidtable({
+        "customfloat":function(a,b){
+            a = a.replace(/[$%,]/g, '')
+            b = b.replace(/[$%,]/g, '')
+            return parseFloat(a, 10) - parseFloat(b ,10);
+        }
+    })
+    reset_rows();
+});
+</script>
+</body>
+</html>
