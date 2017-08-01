@@ -4,9 +4,9 @@ ticker_name_to_exchange = {}
 nasdaq_tickers = [
     'AAPL', 'ADBE', 'ALGN', 'AMZN', 'ATVI', 'BIDU', 'BLUE', 'BOFI',
     'CELG', 'CGNX', 'COST', 'EXEL', 'FB', 'FEYE', 'GOOG', 'HAIN',
-    'HAS', 'ILMN', 'ISRG', 'JBLU', 'MAR', 'MASI', 'MELI',
+    'HAS', 'ILMN', 'IONS', 'ISRG', 'JBLU', 'MAR', 'MASI', 'MELI',
     'MIDD', 'MOMO', 'NFLX', 'NVDA', 'OLED', 'PYPL', 'QQQ', 'SBUX',
-    'SPLK', 'SSNC', 'STMP', 'SWKS', 'TSLA', 'TTD', 'UBNT', 'ULTA',
+    'SPLK', 'SSNC', 'STMP', 'SWKS', 'TRVG', 'TSLA', 'TTD', 'UBNT', 'ULTA',
     'YELP', 'Z',
 ]
 nyse_tickers = [

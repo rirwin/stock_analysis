@@ -1,0 +1,15 @@
+Steps to run
+make dev_venv   # somehow this is needed for make test to work
+source virtualenv_run/bin/activate
+
+USE_PROD_DB=1 virtualenv_run/bin/python -m database.order_history
+USE_PROD_DB=1 virtualenv_run/bin/python -m database.price_history
+
+USE_PROD_DB=1 python -m batch.etrade_csv_ingestor --csv-path ~/Downloads/DownloadTxnHistory.csv
+
+make update_prod_data  # Add any missing tickers to stock_analysis/constants.py to appropriate exchange
+
+make run_prod  # some errors have been caused by bad input data from the etrade csv (i.e., stock with buy price of 0)
+
+sqlite3 database/prod.stock_history.sqlite3db  # for cleanups
+
