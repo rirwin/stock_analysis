@@ -24,12 +24,12 @@ class RowParserException(Exception):
     pass
 
 
-API_KEY = 'NXKYv6wos8t8ZTW7iazJ'
-URL_TEMPLATE = 'https://www.quandl.com/api/v3/datatables/WIKI/PRICES?' + \
-    'ticker={ticker}&date.gte={start_date}&api_key={api_key}'
+API_KEY = 'AZQX3LJX6ENWPYXR'
+URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
+    '&symbol={ticker}&apikey={api_key}&outputsize=compact'
 
 
-class QuandlPriceHistoryFetcher(object):
+class AlphavantagePriceHistoryFetcher(object):
 
     def __init__(self):
         self.order_logic = OrderHistoryLogic()
@@ -70,6 +70,9 @@ class QuandlPriceHistoryFetcher(object):
         response = requests.get(url)
         content = response.content
         data = self._parse_historical(content)
+        data = [d for d in data if d.date >= ticker_date.date]
+        assert data[0].date == ticker_date.date
+        assert data[0].ticker == ticker_date.ticker
         return data
 
     def should_fetch_data_for_date(self, fetch_date):
@@ -102,23 +105,26 @@ class QuandlPriceHistoryFetcher(object):
     def _form_url(self, ticker_date):
         return URL_TEMPLATE.format(
             ticker=ticker_date.ticker,
-            start_date=ticker_date.date.isoformat(),
             api_key=API_KEY,
         )
 
     def _parse_historical(self, content):
         """Gets bytes of json and returns lines of TickerDatePrice tuples
+        { "Meta Data": {  "2. Symbol": "momo"},
+          "Time Series (Daily)": {
+            "2017-12-20": { "4. close": "26.0200", },
+            "2017-12-19": { "4. close": "25.8600", },
+        }
         """
         data = json.loads(content.decode())
-        assert data['datatable']['columns'][0]['name'] == 'ticker'
-        assert data['datatable']['columns'][1]['name'] == 'date'
-        assert data['datatable']['columns'][5]['name'] == 'close'
         rows = []
-        for item in data['datatable']['data']:
-            date = datetime.datetime.strptime(item[1], '%Y-%m-%d').date()
-            rows.append(TickerDatePrice(item[0], date, item[5]))
+        ticker = data['Meta Data']['2. Symbol']
+        for date_str, price_data_point in data['Time Series (Daily)'].items():
+            date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+            price = price_data_point['4. close']
+            rows.append(TickerDatePrice(ticker, date, price))
         return sorted(rows, key=lambda x: x.date)
 
 
 if __name__ == "__main__":
-    QuandlPriceHistoryFetcher().run()
+    AlphavantagePriceHistoryFetcher().run()

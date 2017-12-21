@@ -113,3 +113,44 @@ class TestPortfolioLogic(object):
 
         final_value = (order1.num_shares + order2.num_shares) * prices[-1].price
         assert self.portfolio_logic.get_stock_value(self.user_id, order1.ticker) == final_value
+
+    @db.in_sandbox
+    def test_portfolio_percent_gain_last_day(self):
+        order1 = Order(
+            date=datetime.date(2017, 6, 12),
+            ticker='AAPL',
+            num_shares=1,
+            price=150.0,
+        )
+        order2 = Order(
+            date=datetime.date(2017, 6, 12),
+            ticker='ATVI',
+            num_shares=1,
+            price=60.0,
+        )
+        prices1 = [
+            TickerDatePrice(
+                ticker='AAPL',
+                date=order1.date + datetime.timedelta(days=x),
+                price=order1.price + x
+            )
+            for x in range(5)
+        ]
+        prices2 = [
+            TickerDatePrice(
+                ticker='ATVI',
+                date=order2.date + datetime.timedelta(days=x),
+                price=order2.price + x
+            )
+            for x in range(5)
+        ]
+
+        self.order_logic.add_orders(self.user_id, [order1, order2])
+        self.price_logic.add_prices(prices1)
+        self.price_logic.add_prices(prices2)
+
+        # TODO fix
+        # gain1 = (prices1[-2].price - prices1[-1].price) / prices1[-2].price
+        # gain2 = (prices2[-2].price - prices2[-1].price) / prices2[-2].price
+        # value1 = self.portfolio_logic.get_stock_value_prev_close(self.user_id, order1.ticker)
+        # value2 = self.portfolio_logic.get_stock_value_prev_close(self.user_id, order1.ticker)
