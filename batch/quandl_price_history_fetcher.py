@@ -24,7 +24,7 @@ class RowParserException(Exception):
     pass
 
 
-API_KEY = 'NXKYv6wos8t8ZTW7iazJ'
+API_KEY = 'GET_KEY_FOR_FREE'
 URL_TEMPLATE = 'https://www.quandl.com/api/v3/datatables/WIKI/PRICES?' + \
     'ticker={ticker}&date.gte={start_date}&api_key={api_key}'
 

@@ -24,7 +24,7 @@ class RowParserException(Exception):
     pass
 
 
-API_KEY = 'AZQX3LJX6ENWPYXR'
+API_KEY = 'GET_KEY_FOR_FREE'
 URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
     '&symbol={ticker}&apikey={api_key}&outputsize=compact'
 
