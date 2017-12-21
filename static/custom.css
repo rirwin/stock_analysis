@@ -1,0 +1,13 @@
+.ui.cards > .card  {
+  width: 210px;
+}
+
+.ui.cards > .card > .content > .header:not(.ui) {
+  font-size: 11.1em;
+  font-weight: normal;
+}
+
+.ui.cards > .card .meta,
+.ui.card .meta {
+  font-size: 1.8em;
+}
