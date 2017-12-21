@@ -25,6 +25,7 @@ class RowParserException(Exception):
 
 
 API_KEY = 'GET_KEY_FOR_FREE'
+API_KEY = 'AZQX3LJX6ENWPYXR'
 URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
     '&symbol={ticker}&apikey={api_key}&outputsize=compact'
 
@@ -110,7 +111,7 @@ class AlphavantagePriceHistoryFetcher(object):
 
     def _parse_historical(self, content):
         """Gets bytes of json and returns lines of TickerDatePrice tuples
-        { "Meta Data": {  "2. Symbol": "momo"},
+        { "Meta Data": {  "2. Symbol": "MOMO"},
           "Time Series (Daily)": {
             "2017-12-20": { "4. close": "26.0200", },
             "2017-12-19": { "4. close": "25.8600", },
@@ -121,7 +122,7 @@ class AlphavantagePriceHistoryFetcher(object):
         ticker = data['Meta Data']['2. Symbol']
         for date_str, price_data_point in data['Time Series (Daily)'].items():
             date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-            price = price_data_point['4. close']
+            price = float(price_data_point['4. close'])
             rows.append(TickerDatePrice(ticker, date, price))
         return sorted(rows, key=lambda x: x.date)
 
