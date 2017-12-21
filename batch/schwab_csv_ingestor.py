@@ -2,6 +2,7 @@ import argparse
 import csv
 import datetime
 
+from stock_analysis.logic.order_history import BUY_ORDER_TYPE
 from stock_analysis.logic.order_history import Order
 from stock_analysis.logic.order_history import OrderHistoryLogic
 
@@ -27,11 +28,12 @@ class SchwabIngestor(object):
         self.arg_parser = argparse.ArgumentParser(description='Process an etrade csv file')
         self.arg_parser.add_argument('--csv-path', help='path to csv file')
         self.order_logic = OrderHistoryLogic()
+        self.user_id = USER_ID
 
     def run(self):
         self.args = self.arg_parser.parse_args()
         orders = self.parse_orders_from_csv(self.args.csv_path)
-        self.order_logic.add_orders(USER_ID, orders)
+        self.order_logic.add_orders(self.user_id, orders)
 
     def parse_orders_from_csv(self, csv_path):
         with open(csv_path) as csv_file:
@@ -67,7 +69,7 @@ class SchwabIngestor(object):
         if ticker in blacklisted_tickers or txn_type != 'Buy':
             return None
 
-        return Order(ticker, date, num_shares, share_price)
+        return Order(self.user_id, BUY_ORDER_TYPE, ticker, date, num_shares, share_price)
 
 
 if __name__ == "__main__":
