@@ -2,9 +2,16 @@ clean:
 	rm -rf virtualenv_run/
 	rm -rf .tox/
 
-create_tables: virtualenv_run
-	virtualenv_run/bin/python -m database.order_history
-	virtualenv_run/bin/python -m database.price_history
+dev_create_tables: virtualenv_run
+	USE_DEV_DB=1 virtualenv_run/bin/python -m database.order_history
+	USE_DEV_DB=1 virtualenv_run/bin/python -m database.price_history
+
+dev_populate_tables: virtualenv_run
+	USE_DEV_DB=1 virtualenv_run/bin/python -m database.add_dev_data
+
+prod_create_tables: virtualenv_run
+	USE_PROD_DB=1 virtualenv_run/bin/python -m database.order_history
+	USE_PROD_DB=1 virtualenv_run/bin/python -m database.price_history
 
 dev_venv:
 	virtualenv -p python3.5 virtualenv_run/
