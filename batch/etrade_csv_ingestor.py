@@ -5,6 +5,7 @@ import datetime
 from stock_analysis.logic.order_history import BUY_ORDER_TYPE
 from stock_analysis.logic.order_history import Order
 from stock_analysis.logic.order_history import OrderHistoryLogic
+from stock_analysis.constants import USER_ID
 
 
 # TODO handle symbols that are sold
@@ -16,10 +17,6 @@ blacklisted_tickers.append('AMT')
 
 class RowParserException(Exception):
     pass
-
-
-# TODO create a user table (move this to repo level TODO)
-USER_ID = 1
 
 
 class EtradeIngestor(object):
