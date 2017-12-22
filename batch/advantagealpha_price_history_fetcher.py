@@ -6,6 +6,7 @@ import pytz
 import requests
 import time
 
+from stock_analysis import constants
 from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.order_history import TickerDate
 from stock_analysis.logic.price_history import PriceHistoryLogic
@@ -25,7 +26,6 @@ class RowParserException(Exception):
 
 
 API_KEY = 'GET_KEY_FOR_FREE'
-API_KEY = 'AZQX3LJX6ENWPYXR'
 URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
     '&symbol={ticker}&apikey={api_key}&outputsize=compact'
 
