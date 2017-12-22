@@ -91,7 +91,8 @@ class PortfolioCommands(object):
                     price=price_info[ticker][end_date],
                     gain1dp=100 * (price_info[ticker][end_date] - price_info[ticker][start_date]) /
                         price_info[ticker][start_date],
-                    gain1dv=ticker_to_num_shares[ticker] * (price_info[ticker][end_date] - price_info[ticker][start_date]),
+                    gain1dv=ticker_to_num_shares[ticker] * (price_info[ticker][end_date] -
+                        price_info[ticker][start_date]),
                     gainp=100 * (price_info[ticker][end_date] * ticker_to_num_shares[ticker] -
                         purchase_value[ticker]) / purchase_value[ticker],
                     gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] - purchase_value[ticker],
@@ -120,7 +121,10 @@ class PortfolioCommands(object):
         curr_date = historical_dates[0]
 
         # compute the purchase date vs a decision not to purchase {each bench ticker}
-        total_assets_purchased = sum(o.price * o.num_shares for o in orders if o.order_type == order_history.BUY_ORDER_TYPE)
+        total_assets_purchased = sum(
+            o.price * o.num_shares for o in orders
+            if o.order_type == order_history.BUY_ORDER_TYPE
+        )
         order_comps = defaultdict(list)  # {ticker: [(order, gain, weight)]
         for order in orders:
             order_gain = 100 * (ticker_date_price_map[order.ticker][curr_date] - order.price) / order.price

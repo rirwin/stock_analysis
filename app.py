@@ -97,9 +97,13 @@ def _make_td_html(td_data, field):
 
 def _make_cards_html():
     cards = []
-    for card_title in ['value', 'gain1dp', 'gain1dv', 'gainp', 'gainv', 'gainspyp', 'gainqqqp', 'gainspy1dp', 'gainqqq1dp']:
+    for card_title in [
+        'value', 'gain1dp', 'gain1dv', 'gainp', 'gainv',
+        'gainspyp', 'gainqqqp', 'gainspy1dp', 'gainqqq1dp'
+    ]:
         cards.append(card_template.format(key=card_title, value='-'))
     return cards
+
 
 def _make_cards_summary(details, order_comps):
     cards = []
@@ -112,8 +116,8 @@ def _make_cards_summary(details, order_comps):
             comps[bench_ticker] += sum(o[1][bench_ticker] * o[2] for o in orders)
 
     for bench_ticker, vs_percent in comps.items():
-       value = '{0:.2f}%'.format(vs_percent)
-       cards.append(card_template.format(key='vs. ' + bench_ticker, value=value))
+        value = '{0:.2f}%'.format(vs_percent)
+        cards.append(card_template.format(key='vs. ' + bench_ticker, value=value))
 
     return cards
 
