@@ -2,22 +2,24 @@ import datetime
 import mock
 import pytest
 import pytz
-from batch.google_price_history_fetcher import GooglePriceHistoryFetcher
-from batch.google_price_history_fetcher import DatePrice
+from batch.advantagealpha_price_history_fetcher import AlphavantagePriceHistoryFetcher
 from stock_analysis.logic.order_history import TickerDate
 from stock_analysis.logic.price_history import TickerDatePrice
 from stock_analysis import constants
 
 
-class TestGooglePriceHistoryFetcher(object):
+class TestAlphavantagePriceHistoryFetcher(object):
 
     def test_parse_historical_data(self):
-        batch = GooglePriceHistoryFetcher()
-        content = 'Header Line\n2-Jun-17,1,1,1,1,27770715\n3-Jun-17,2,2,2,2,27770715'.encode()
+        batch = AlphavantagePriceHistoryFetcher()
+        content = '{ "Meta Data": {  "2. Symbol": "MOMO"},"Time Series (Daily)": {' + \
+            '"2017-12-20": { "4. close": "1.0" }, ' + \
+            '"2017-12-19": { "4. close": "2.0" }}}'
+        content = content.encode()
         price_history = batch._parse_historical(content)
         assert price_history == [
-            DatePrice(date=datetime.date(2017, 6, 2), price=1.0),
-            DatePrice(date=datetime.date(2017, 6, 3), price=2.0),
+            TickerDatePrice(ticker='MOMO', date=datetime.date(2017, 12, 19), price=2.0),
+            TickerDatePrice(ticker='MOMO', date=datetime.date(2017, 12, 20), price=1.0),
         ]
 
     @pytest.mark.parametrize(
@@ -38,32 +40,32 @@ class TestGooglePriceHistoryFetcher(object):
         ]
     )
     def test_should_fetch_data_for_date(self, fetch_date, now, should_fetch):
-        batch = GooglePriceHistoryFetcher()
-        with mock.patch('batch.google_price_history_fetcher.datetime.datetime') as mock_datetime:
+        batch = AlphavantagePriceHistoryFetcher()
+        with mock.patch(
+            'batch.advantagealpha_price_history_fetcher.datetime.datetime'
+        ) as mock_datetime:
             mock_datetime.now.return_value = now
             assert batch.should_fetch_data_for_date(fetch_date) is should_fetch
 
     def test_fetch_ticker_history(self):
-        batch = GooglePriceHistoryFetcher()
+        batch = AlphavantagePriceHistoryFetcher()
         ticker_date = TickerDate('YELP', datetime.date(2017, 6, 12))
-        date_price = DatePrice(datetime.date(2017, 6, 12), 31.2)
+        ticker_date_price = TickerDatePrice('YELP', datetime.date(2017, 6, 12), 31.2)
         with mock.patch(
-            'batch.google_price_history_fetcher.time'
+            'batch.advantagealpha_price_history_fetcher.time'
         ), mock.patch(
-            'batch.google_price_history_fetcher.requests'
+            'batch.advantagealpha_price_history_fetcher.requests'
         ) as mock_requests, mock.patch.object(
             batch,
             '_parse_historical',
-            return_value=[date_price]
+            return_value=[ticker_date_price]
         ) as mock_parse:
                 mock_requests.get = mock.Mock()
                 data = batch.fetch_ticker_history(ticker_date)
 
                 assert mock_requests.get.called
                 assert mock_parse.called
-                assert data == [
-                    TickerDatePrice(ticker_date.ticker, date_price.date, date_price.price)
-                ]
+                assert data == [ticker_date_price]
 
     @pytest.mark.parametrize(
         'ticker_date,min_date_history_exists,max_history_date,result', [
@@ -82,7 +84,7 @@ class TestGooglePriceHistoryFetcher(object):
         ]
     )
     def test_get_fetch_date(self, ticker_date, min_date_history_exists, max_history_date, result):
-        batch = GooglePriceHistoryFetcher()
+        batch = AlphavantagePriceHistoryFetcher()
         with mock.patch.object(
             batch.price_logic,
             'does_ticker_date_history_exists',
@@ -95,7 +97,7 @@ class TestGooglePriceHistoryFetcher(object):
             assert batch.get_fetch_date(ticker_date) == result
 
     def test_run(self):
-        batch = GooglePriceHistoryFetcher()
+        batch = AlphavantagePriceHistoryFetcher()
         ticker_date = TickerDate('AAPL', datetime.date(2017, 6, 19))
 
         with mock.patch.object(
@@ -113,7 +115,7 @@ class TestGooglePriceHistoryFetcher(object):
                 [mock.call(td) for td in benchmark_ticker_dates]
 
     def test_process_ticker_order_date(self):
-        batch = GooglePriceHistoryFetcher()
+        batch = AlphavantagePriceHistoryFetcher()
         ticker_date = TickerDate('AAPL', datetime.date(2017, 6, 19))
         mock_history = mock.Mock()
         with mock.patch.object(

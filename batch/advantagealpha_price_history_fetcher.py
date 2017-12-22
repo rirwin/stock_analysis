@@ -1,5 +1,6 @@
 from collections import namedtuple
 import datetime
+import json
 import logging
 import pytz
 import requests
@@ -9,7 +10,6 @@ from stock_analysis.logic.order_history import OrderHistoryLogic
 from stock_analysis.logic.order_history import TickerDate
 from stock_analysis.logic.price_history import PriceHistoryLogic
 from stock_analysis.logic.price_history import TickerDatePrice
-from stock_analysis import constants
 
 
 logging.basicConfig(level=logging.INFO)
@@ -24,11 +24,13 @@ class RowParserException(Exception):
     pass
 
 
-URL_TEMPLATE = 'http://www.google.com/finance/historical?' + \
-    'q={exchange}:{ticker}&startdate={month}+{day}%2C+{year}&output=csv'
+API_KEY = 'GET_KEY_FOR_FREE'
+API_KEY = 'AZQX3LJX6ENWPYXR'
+URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
+    '&symbol={ticker}&apikey={api_key}&outputsize=compact'
 
 
-class GooglePriceHistoryFetcher(object):
+class AlphavantagePriceHistoryFetcher(object):
 
     def __init__(self):
         self.order_logic = OrderHistoryLogic()
@@ -73,7 +75,10 @@ class GooglePriceHistoryFetcher(object):
         response = requests.get(url)
         content = response.content
         data = self._parse_historical(content)
-        return [TickerDatePrice(ticker_date.ticker, x.date, x.price) for x in data]
+        data = [d for d in data if d.date >= ticker_date.date]
+        assert data[0].date == ticker_date.date
+        assert data[0].ticker == ticker_date.ticker
+        return data
 
     def should_fetch_data_for_date(self, fetch_date):
         """See if there is possibly new data to fetch.
@@ -103,35 +108,28 @@ class GooglePriceHistoryFetcher(object):
         return False
 
     def _form_url(self, ticker_date):
-        '''http://www.google.com/finance/historical?q=NASDAQ:AAPL&startdate=May+24%2C+2017&output=csv'''
         return URL_TEMPLATE.format(
-            exchange=constants.ticker_name_to_exchange[ticker_date.ticker],
             ticker=ticker_date.ticker,
-            month=ticker_date.date.strftime('%B'),
-            day=ticker_date.date.day,
-            year=ticker_date.date.year
+            api_key=API_KEY,
         )
 
     def _parse_historical(self, content):
-        lines = content.decode().strip().split('\n')
-        rows = []
-        for line in lines[1:]:  # Skip the header row
-            rows.append(self._parse_line(line))
-        return sorted(rows, key=lambda x: x.date)
-
-    def _parse_line(self, line):
-        """Parse line in format 2-Jun-17,153.58,155.45,152.89,155.45,27770715
-        The second to last field is the closing price.
+        """Gets bytes of json and returns lines of TickerDatePrice tuples
+        { "Meta Data": {  "2. Symbol": "MOMO"},
+          "Time Series (Daily)": {
+            "2017-12-20": { "4. close": "26.0200", },
+            "2017-12-19": { "4. close": "25.8600", },
+        }
         """
-        fields = line.split(',')
-        date = self._parse_date(fields[0])
-        close = float(fields[-2])
-        return DatePrice(date, close)
-
-    def _parse_date(self, date_str):
-        """Parse date in format 26-May-17"""
-        return datetime.datetime.strptime(date_str, "%d-%b-%y").date()
+        data = json.loads(content.decode())
+        rows = []
+        ticker = data['Meta Data']['2. Symbol']
+        for date_str, price_data_point in data['Time Series (Daily)'].items():
+            date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+            price = float(price_data_point['4. close'])
+            rows.append(TickerDatePrice(ticker, date, price))
+        return sorted(rows, key=lambda x: x.date)
 
 
 if __name__ == "__main__":
-    GooglePriceHistoryFetcher().run()
+    AlphavantagePriceHistoryFetcher().run()
