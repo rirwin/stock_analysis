@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 from collections import namedtuple
 from stock_analysis.logic import order_history
@@ -7,7 +8,19 @@ from stock_analysis import constants
 
 PortfolioStockDetails = namedtuple(
     'PortfolioStockDetails',
-    ['ticker', 'price', 'gain1dp', 'gain1dv', 'gainp', 'gainv', 'portfoliop', 'value']
+    [
+        'ticker',
+        'price',
+        'gain1dp',
+        'gain1dv',
+        'gainp',
+        'gainv',
+        'gainspyp',
+        'gainqqqp',
+        'gaindiap',
+        'portfoliop',
+        'value'
+    ]
 )
 PortfolioOrderDetails = namedtuple(
     'PortfolioOrderDetails',
@@ -21,8 +34,10 @@ PortfolioOrderDetails = namedtuple(
         'gainv',
         'gainspyp',
         'gainqqqp',
+        'gaindiap',
         'gainspy1dp',
         'gainqqq1dp',
+        'gaindia1dp',
         'portfoliop',
         'value',
     ]
@@ -34,6 +49,7 @@ class PortfolioCommands(object):
     order_logic = order_history.OrderHistoryLogic()
     price_logic = price_history.PriceHistoryLogic()
 
+    # TODO delete
     def get_portfolio_details(self, user_id):
         (end_date, start_date) = self.price_logic.get_dates_last_two_sessions()
         ticker_to_num_shares = self.order_logic.get_portfolio_shares_owned_on_date(user_id, end_date)
@@ -44,7 +60,6 @@ class PortfolioCommands(object):
         purchase_value, _ = self.order_logic.get_ticker_total_purchased_sold(user_id)
 
         port_value = sum(price_info[ticker][end_date] * ticker_to_num_shares[ticker] for ticker in tickers)
-
         return [
             PortfolioStockDetails(
                 ticker=ticker,
@@ -56,6 +71,9 @@ class PortfolioCommands(object):
                     purchase_value[ticker]) / purchase_value[ticker],
                 gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] -
                 purchase_value[ticker],
+                gainspyp=0,
+                gainqqqp=0,
+                gaindiap=0,
                 portfoliop=100 * (ticker_to_num_shares[ticker] * price_info[ticker][end_date]) / port_value,
                 value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
             )
@@ -82,8 +100,10 @@ class PortfolioCommands(object):
             gain_scale = sum(order[2] for order in order_purchase_comps[ticker])
             gainspyp = sum(order[1]['SPY'] * order[2] for order in order_purchase_comps[ticker]) / gain_scale
             gainqqqp = sum(order[1]['QQQ'] * order[2] for order in order_purchase_comps[ticker]) / gain_scale
+            gaindiap = sum(order[1]['DIA'] * order[2] for order in order_purchase_comps[ticker]) / gain_scale
             gainspy1dp = order_fixed_comps[ticker]['SPY']['1dp']
             gainqqq1dp = order_fixed_comps[ticker]['QQQ']['1dp']
+            gaindia1dp = order_fixed_comps[ticker]['DIA']['1dp']
             details.append(
                 PortfolioOrderDetails(
                     ticker=ticker,
@@ -98,8 +118,10 @@ class PortfolioCommands(object):
                     gainv=ticker_to_num_shares[ticker] * price_info[ticker][end_date] - purchase_value[ticker],
                     gainspyp=gainspyp,
                     gainqqqp=gainqqqp,
+                    gaindiap=gaindiap,
                     gainspy1dp=gainspy1dp,
                     gainqqq1dp=gainqqq1dp,
+                    gaindia1dp=gaindia1dp,
                     portfoliop=100 * (ticker_to_num_shares[ticker] * price_info[ticker][end_date]) / port_value,
                     value=ticker_to_num_shares[ticker] * price_info[ticker][end_date]
                 )

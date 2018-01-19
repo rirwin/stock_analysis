@@ -37,7 +37,7 @@ def static_testing():
 
 @app.route('/portfolio')
 def portfolio():
-    basic_details = portfolio_commands.get_portfolio_details(1)
+    basic_details = portfolio_commands.get_portfolio_order_details(1)
     order_comps = portfolio_commands.get_benchmark_comparison_to_order_prices(1)
     table_lines = _make_table_from_details(basic_details)
     cards_lines = _make_cards_summary(basic_details, order_comps)
@@ -95,6 +95,7 @@ def _make_td_html(td_data, field):
     return '{0}{1}</td>'.format(td_tag, td_data_formatted)
 
 
+# TODO delete?
 def _make_cards_html():
     cards = []
     for card_title in [
@@ -117,7 +118,7 @@ def _make_cards_summary(details, order_comps):
 
     for bench_ticker, vs_percent in comps.items():
         value = '{0:.2f}%'.format(vs_percent)
-        cards.append(card_template.format(key='vs. ' + bench_ticker, value=value))
+        cards.append(card_template.format(key='gain' + bench_ticker.lower() + 'p', value=value))
 
     return cards
 

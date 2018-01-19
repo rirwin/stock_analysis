@@ -42,8 +42,7 @@ function highlight_row(ev) {
 
 function calculate_cards() {
     var detail_classes = [
-        'value', 'gainp', 'gainv', 'gain1dp', 'gain1dv', 'gainspyp',
-        'gainqqqp', 'gainspy1dp', 'gainqqq1dp'
+        'value', 'gainp', 'gainv', 'gain1dp', 'gain1dv', 'gainspyp', 'gainqqqp', 'gaindiap'
     ]
     var weight_map = {};
 
