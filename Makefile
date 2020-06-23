@@ -14,7 +14,7 @@ prod_create_tables: virtualenv_run
 	USE_PROD_DB=1 virtualenv_run/bin/python -m database.price_history
 
 dev_venv:
-	virtualenv -p python3.5 virtualenv_run/
+	virtualenv -p python3.8 virtualenv_run/
 	virtualenv_run/bin/pip install -r requirements-dev.txt
 
 test:
@@ -24,7 +24,7 @@ test_debug:
 	USE_TEST_DB=1 virtualenv_run/bin/python -m pytest -s tests/ -v
 
 virtualenv_run:
-	virtualenv -p python3.5 virtualenv_run/
+	virtualenv -p python3.8 virtualenv_run/
 	virtualenv_run/bin/pip install -r requirements.txt
 
 run_dev: virtualenv_run

@@ -25,6 +25,7 @@ class RowParserException(Exception):
     pass
 
 
+#TODO move to a file
 API_KEY = 'GET_KEY_FOR_FREE'
 URL_TEMPLATE = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY' + \
     '&symbol={ticker}&apikey={api_key}&outputsize=compact'
@@ -71,11 +72,12 @@ class AlphavantagePriceHistoryFetcher(object):
         self.log.info("...Fetching data from %s to now..." % ticker_date.date.isoformat())
         url = self._form_url(ticker_date)
         # TODO check throttle
-        time.sleep(1)  # Sleep to throttle hitting api
+        time.sleep(12)  # Sleep to throttle hitting api
         response = requests.get(url)
         content = response.content
         data = self._parse_historical(content)
         data = [d for d in data if d.date >= ticker_date.date]
+        print(data)
         assert data[0].date == ticker_date.date
         assert data[0].ticker == ticker_date.ticker
         return data
